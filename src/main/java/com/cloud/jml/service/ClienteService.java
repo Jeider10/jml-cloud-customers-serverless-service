@@ -1,6 +1,8 @@
 package com.cloud.jml.service;
 
 import com.cloud.jml.dto.ClienteDTO;
+import com.cloud.jml.exception.ClienteDuplicadoException;
+import com.cloud.jml.exception.ClienteNoEncontradoException;
 import com.cloud.jml.model.ClienteEntity;
 import com.cloud.jml.repository.ClienteRepository;
 import jakarta.transaction.Transactional;
@@ -25,6 +27,13 @@ public class ClienteService {
     @Transactional
     public ClienteDTO crearCliente(ClienteDTO clienteDTO) {
         log.info("📌 Inicio de creación de cliente: {}", clienteDTO.getNombres());
+
+        // Verificar si ya existe por identificación
+        Optional<ClienteEntity> existente = obtenerClientePorIdentificacion(clienteDTO);
+        if (existente.isPresent()) {
+            log.warn("⚠️ Cliente duplicado: {}", clienteDTO.getIdentificacion());
+            throw new ClienteDuplicadoException(clienteDTO.getIdentificacion());
+        }
 
         // Mapeo de DTO a Entity
         ClienteEntity clienteEntity = mapDtoToEntity(clienteDTO);
@@ -53,7 +62,7 @@ public class ClienteService {
         if (byIdentificacion.isPresent()) {
             log.info("✅ Cliente encontrado con identificacion: {}", byIdentificacion.get().getIdentificacion());
         } else {
-            log.warn("⚠️ No se encontró cliente con identificacion: {}: ", byIdentificacion.get().getIdentificacion());
+            log.warn("⚠️ No se encontró cliente con identificacion: {}", clienteDTO.getIdentificacion());
         }
 
         log.info("📌 Finaliza búsqueda de cliente por identificacion: {}", clienteDTO.getIdentificacion());
@@ -70,7 +79,7 @@ public class ClienteService {
         if (byNombres.isPresent()) {
             log.info("✅ Cliente encontrado con nombres: {}", byNombres.get().getNombres());
         } else {
-            log.warn("⚠️ No se encontró cliente con nombres: {}: ", byNombres.get().getNombres());
+            log.warn("⚠️ No se encontró cliente con nombres: {}: ", clienteDTO.getNombres());
         }
 
         log.info("📌 Finaliza búsqueda de cliente por nombres: {}", clienteDTO.getNombres());
@@ -87,7 +96,7 @@ public class ClienteService {
         if (byApellidos.isPresent()) {
             log.info("✅ Cliente encontrado con apellidos: {}", byApellidos.get().getApellidos());
         } else {
-            log.warn("⚠️ No se encontró cliente con apellidos: {}", byApellidos.get().getApellidos());
+            log.warn("⚠️ No se encontró cliente con apellidos: {}", clienteDTO.getApellidos());
         }
 
         log.info("📌 Finaliza búsqueda de cliente por apellidos: {}", clienteDTO.getApellidos());
@@ -110,16 +119,8 @@ public class ClienteService {
     public ClienteDTO actualizarCliente(ClienteDTO clienteDTO) {
         log.info("📌 Inicio de actualización de cliente: {} con identificacion: {}", clienteDTO.getNombres(), clienteDTO.getIdentificacion());
 
-        Optional<ClienteEntity> clienteOpt = clienteRepository.findByIdentificacion(clienteDTO.getIdentificacion());
-
-        if (clienteOpt.isPresent()) {
-            log.info("✅ Cliente: {} encontrado con identificacion: {}", clienteDTO.getNombres(), clienteDTO.getIdentificacion());
-        } else {
-            log.warn("⚠️ No se encontró el cliente: {} con identificacion: {}", clienteDTO.getNombres(), clienteDTO.getIdentificacion());
-            return null; // O lanzar una excepción personalizada
-        }
-
-        ClienteEntity clienteEntity = clienteOpt.get();
+        // Verificar si ya existe por identificación
+        ClienteEntity clienteEntity = validarExistenciaCliente(clienteDTO);
 
         actualizarDatosCliente(clienteDTO, clienteEntity);
 
@@ -137,19 +138,13 @@ public class ClienteService {
     public void eliminarCliente(ClienteDTO clienteDTO) {
         log.info("📌 Inicio de eliminación de cliente con identificacion: {}", clienteDTO.getIdentificacion());
 
-        Optional<ClienteEntity> clienteOpt = clienteRepository.findByIdentificacion(clienteDTO.getIdentificacion());
+        // Verificar si ya existe por identificación
+        ClienteEntity clienteEntity = validarExistenciaCliente(clienteDTO);
 
-        if (clienteOpt.isPresent()) {
-            log.info("✅ Cliente encontrado con identificacion: {}, sera eliminado.", clienteDTO.getIdentificacion());
-        } else {
-            log.warn("⚠️ No se encontró cliente con identificacion: {}", clienteDTO.getIdentificacion());
-            throw new RuntimeException("Cliente no encontrado con identificacion: " + clienteDTO.getIdentificacion());
-        }
+        clienteRepository.delete(clienteEntity);
 
-        clienteRepository.delete(clienteOpt.get());
         log.info("✅ Cliente eliminado con identificacion: {}", clienteDTO.getIdentificacion());
     }
-
 
     @Transactional
     private ClienteEntity mapDtoToEntity(ClienteDTO clienteDTO) {
@@ -194,5 +189,17 @@ public class ClienteService {
 
         // Actualizamos la fecha de actualización
         clienteEntity.setFechaActualizacion(LocalDateTime.now());
+    }
+
+    private ClienteEntity validarExistenciaCliente(ClienteDTO clienteDTO) {
+        Optional<ClienteEntity> clienteOpt = obtenerClientePorIdentificacion(clienteDTO);
+
+        if (clienteOpt.isPresent()) {
+            log.info("✅ Cliente: {} encontrado con identificacion: {}", clienteDTO.getNombres(), clienteDTO.getIdentificacion());
+            return clienteOpt.get();
+        } else {
+            log.warn("⚠️ No se encontró cliente: {} con identificacion: {}", clienteDTO.getNombres(), clienteDTO.getIdentificacion());
+            throw new ClienteNoEncontradoException(clienteDTO.getIdentificacion());
+        }
     }
 }

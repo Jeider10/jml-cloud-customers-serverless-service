@@ -23,9 +23,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
 
     @Override
-    protected void doFilterInternal(@NotNull HttpServletRequest request,
-                                    @NotNull HttpServletResponse response,
-                                    @NotNull FilterChain chain) throws ServletException, IOException {
+    protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain chain) throws ServletException, IOException {
+
+//        String requestURI = request.getRequestURI();
+//
+//        // ✅ Excluir rutas rutas públicas que no requieren autenticación
+//        if (requestURI.startsWith("/auth/") || requestURI.startsWith("/clientes/") || requestURI.startsWith("/user/") || requestURI.startsWith("/subsidiary/")
+//                || requestURI.startsWith("/branch/") || requestURI.startsWith("/rol/") || requestURI.startsWith("/user-access/")) {
+//            chain.doFilter(request, response);
+//            return;
+//        }
 
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {

@@ -1,6 +1,6 @@
 package com.cloud.jml.config;
 
-import com.cloud.jml.exception.GeneralException;
+import com.cloud.jml.exception.ClienteDuplicadoException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+//                                "/clientes/**", // Permitir acciones en auth sin autenticación
                                 "/css/**",
                                 "/js/**",
                                 "/images/**"
@@ -45,7 +46,7 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) ->
-                                GeneralException.handleAuthError(response, authException))
+                                ClienteDuplicadoException.handleAuthError(response, authException))
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
