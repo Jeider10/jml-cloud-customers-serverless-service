@@ -1,6 +1,5 @@
 package com.cloud.jml.config;
 
-//import com.cloud.jml.exception.JwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +24,6 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
-//    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
@@ -57,21 +55,15 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
+                                .requestMatchers(
 //                                "/clientes/register", // permitir registro de clientes sin auth
-                                "/css/**",
-                                "/js/**",
-                                "/images/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
+                                        "/css/**",
+                                        "/js/**",
+                                        "/images/**"
+                                ).permitAll()
+                                .anyRequest().authenticated()
                 )
-//                .exceptionHandling(ex -> ex
-//                        .authenticationEntryPoint(authenticationEntryPoint)
-//                )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-
-        // 🔹 Aplica el CorsConfigurationSource global sin usar http.cors()
-//        http.setSharedObject(CorsConfigurationSource.class, corsConfigurationSource());
 
         return http.build();
     }
