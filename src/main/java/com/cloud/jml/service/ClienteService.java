@@ -37,7 +37,6 @@ public class ClienteService {
 
         // Mapeo de DTO a Entity
         ClienteEntity clienteEntity = mapDtoToEntity(clienteDTO);
-        clienteEntity.setFechaCreacion(LocalDateTime.now());
         log.debug("🔹 Cliente mapeado a Entity: {}", clienteEntity);
 
         // Guardamos en la base de datos
@@ -71,37 +70,37 @@ public class ClienteService {
     }
 
     @Transactional
-    public Optional<ClienteEntity> obtenerClientePorNombre(ClienteDTO clienteDTO) {
+    public List<ClienteEntity> obtenerClientePorNombres(ClienteDTO clienteDTO) {
         log.info("📌 Inicio de búsqueda de cliente por nombre: {}", clienteDTO.getNombres());
 
-        Optional<ClienteEntity> byNombres = clienteRepository.findByNombres(clienteDTO.getNombres());
+        List<ClienteEntity> clientes = clienteRepository.findByNombres(clienteDTO.getNombres());
 
-        if (byNombres.isPresent()) {
-            log.info("✅ Cliente encontrado con nombres: {}", byNombres.get().getNombres());
+        if (clientes.isEmpty()) {
+            log.warn("⚠️ No se encontró cliente con nombres: {}", clienteDTO.getNombres());
         } else {
-            log.warn("⚠️ No se encontró cliente con nombres: {}: ", clienteDTO.getNombres());
+            log.info("✅ Se encontraron {} cliente(s) con el nombre: {}", clientes.size(), clienteDTO.getNombres());
         }
 
         log.info("📌 Finaliza búsqueda de cliente por nombres: {}", clienteDTO.getNombres());
 
-        return byNombres;
+        return clientes;
     }
 
     @Transactional
-    public Optional<ClienteEntity> obtenerClientePorApellido(ClienteDTO clienteDTO) {
-        log.info("📌 Inicio de búsqueda de cliente por apellido: {}", clienteDTO.getNombres());
+    public List<ClienteEntity> obtenerClientePorApellidos(ClienteDTO clienteDTO) {
+        log.info("📌 Inicio de búsqueda de cliente por apellido: {}", clienteDTO.getApellidos());
 
-        Optional<ClienteEntity> byApellidos = clienteRepository.findByApellidos(clienteDTO.getApellidos());
+        List<ClienteEntity> clientes = clienteRepository.findByApellidos(clienteDTO.getApellidos());
 
-        if (byApellidos.isPresent()) {
-            log.info("✅ Cliente encontrado con apellidos: {}", byApellidos.get().getApellidos());
+        if (!clientes.isEmpty()) {
+            log.info("✅ Se encontraron {} clientes con el apellido: {}", clientes.size(), clienteDTO.getApellidos());
         } else {
             log.warn("⚠️ No se encontró cliente con apellidos: {}", clienteDTO.getApellidos());
         }
 
         log.info("📌 Finaliza búsqueda de cliente por apellidos: {}", clienteDTO.getApellidos());
 
-        return byApellidos;
+        return clientes;
     }
 
     @Transactional
@@ -119,8 +118,15 @@ public class ClienteService {
     public ClienteDTO actualizarCliente(ClienteDTO clienteDTO) {
         log.info("📌 Inicio de actualización de cliente: {} con identificacion: {}", clienteDTO.getNombres(), clienteDTO.getIdentificacion());
 
+        Optional<ClienteEntity> clienteOpt = obtenerClientePorIdentificacion(clienteDTO);
+
+        if (clienteOpt.isEmpty()) {
+            log.warn("⚠️ No se encontró cliente con identificacion: {}", clienteDTO.getIdentificacion());
+            throw new ClienteNoEncontradoException(clienteDTO.getIdentificacion());
+        }
+
         // Verificar si ya existe por identificación
-        ClienteEntity clienteEntity = validarExistenciaCliente(clienteDTO);
+        ClienteEntity clienteEntity = clienteOpt.get();
 
         actualizarDatosCliente(clienteDTO, clienteEntity);
 
@@ -157,6 +163,7 @@ public class ClienteService {
         clienteEntity.setApellidos(clienteDTO.getApellidos());
         clienteEntity.setTelefono(clienteDTO.getTelefono());
         clienteEntity.setDireccion(clienteDTO.getDireccion());
+        clienteEntity.setFechaCreacion(LocalDateTime.now());
 
         log.info("📌 Finalizando mapeo DTO a Entity para crear cliente");
 
@@ -173,6 +180,8 @@ public class ClienteService {
         clienteDTO.setApellidos(clienteEntity.getApellidos());
         clienteDTO.setTelefono(clienteEntity.getTelefono());
         clienteDTO.setDireccion(clienteEntity.getDireccion());
+        clienteDTO.setFechaCreacion(clienteEntity.getFechaCreacion());
+        clienteDTO.setFechaActualizacion(clienteEntity.getFechaActualizacion());
 
         log.info("📌 Finalizando mapeo Entity a DTO para crear cliente");
 
@@ -181,7 +190,6 @@ public class ClienteService {
 
     private void actualizarDatosCliente(ClienteDTO clienteDTO, ClienteEntity clienteEntity) {
         // Actualizamos solo los campos permitidos
-        clienteEntity.setIdentificacion(clienteDTO.getIdentificacion());
         clienteEntity.setNombres(clienteDTO.getNombres());
         clienteEntity.setApellidos(clienteDTO.getApellidos());
         clienteEntity.setTelefono(clienteDTO.getTelefono());

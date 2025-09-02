@@ -4,6 +4,7 @@ import com.cloud.jml.dto.ClienteDTO;
 import com.cloud.jml.model.ClienteEntity;
 import com.cloud.jml.service.ClienteService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,36 +35,50 @@ public class ClienteController {
     }
 
     @GetMapping("/identificacion")
-    public Optional<ClienteEntity> obtenerClientePorIdentificacion(@RequestBody ClienteDTO clienteDTO) {
-        log.info("📌 Iniciando petición para buscar cliente por identificacion: {}", clienteDTO.getIdentificacion());
+    public ResponseEntity<ClienteEntity> obtenerClientePorIdentificacion(@RequestParam("identificacion") String identificacion) {
+        log.info("📌 Iniciando petición para buscar cliente por identificacion: {}", identificacion);
+
+        ClienteDTO clienteDTO = new ClienteDTO();
+        clienteDTO.setIdentificacion(identificacion);
 
         Optional<ClienteEntity> response = clienteService.obtenerClientePorIdentificacion(clienteDTO);
 
-        log.info("📌 Finaliza petición de buscar cliente por identificacion: {}", clienteDTO.getIdentificacion());
+        log.info("📌 Finaliza petición de buscar cliente por identificacion: {}", identificacion);
 
-        return ResponseEntity.ok(response).getBody();
+        return response.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @GetMapping("/nombre")
-    public Optional<ClienteEntity> obtenerClientePorNombre(@RequestBody ClienteDTO clienteDTO) {
-        log.info("📌 Iniciando petición para buscar cliente por nombre: {}", clienteDTO.getNombres());
+    @GetMapping("/nombres")
+    public ResponseEntity<List<ClienteEntity>> obtenerClientePorNombres(@RequestParam("nombres") String nombres) {
+        log.info("📌 Iniciando petición para buscar cliente por nombres: {}", nombres);
 
-        Optional<ClienteEntity> response = clienteService.obtenerClientePorNombre(clienteDTO);
+        ClienteDTO clienteDTO = new ClienteDTO();
+        clienteDTO.setNombres(nombres);
 
-        log.info("📌 Finaliza petición de buscar cliente por nombre: {}", clienteDTO.getNombres());
+        List<ClienteEntity> response = clienteService.obtenerClientePorNombres(clienteDTO);
 
-        return ResponseEntity.ok(response).getBody();
+        log.info("📌 Finaliza petición de buscar cliente por nombres: {}", nombres);
+
+        return response.isEmpty()
+                ? ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+                : ResponseEntity.ok(response);
     }
 
-    @GetMapping("/apellido")
-    public Optional<ClienteEntity> obtenerClientePorApellido(@RequestBody ClienteDTO clienteDTO) {
-        log.info("📌 Iniciando petición para buscar cliente por apellido: {}", clienteDTO.getApellidos());
+    @GetMapping("/apellidos")
+    public ResponseEntity<List<ClienteEntity>> obtenerClientePorApellidos(@RequestParam("apellidos") String apellidos) {
+        log.info("📌 Iniciando petición para buscar cliente por apellidos: {}", apellidos);
 
-        Optional<ClienteEntity> response = clienteService.obtenerClientePorApellido(clienteDTO);
+        ClienteDTO clienteDTO = new ClienteDTO();
+        clienteDTO.setApellidos(apellidos);
 
-        log.info("📌 Finaliza petición de buscar cliente por apellido: {}", clienteDTO.getApellidos());
+        List<ClienteEntity> response = clienteService.obtenerClientePorApellidos(clienteDTO);
 
-        return ResponseEntity.ok(response).getBody();
+        log.info("📌 Finaliza petición de buscar cliente por apellidos: {}", apellidos);
+
+        return response.isEmpty()
+                ? ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+                : ResponseEntity.ok(response);
     }
 
     @GetMapping("/listar-todos")
@@ -93,8 +108,11 @@ public class ClienteController {
     }
 
     @DeleteMapping("/eliminar-identificacion")
-    public ResponseEntity<Void> eliminarCliente(@RequestBody ClienteDTO clienteDTO) {
-        log.info("📌 Iniciando petición para eliminar cliente con identificacion: {}", clienteDTO.getIdentificacion());
+    public ResponseEntity<Void> eliminarCliente(@RequestParam("identificacion") String identificacion) {
+        log.info("📌 Iniciando petición para eliminar cliente con identificacion: {}", identificacion);
+
+        ClienteDTO clienteDTO = new ClienteDTO();
+        clienteDTO.setIdentificacion(identificacion);
 
         try {
             clienteService.eliminarCliente(clienteDTO);

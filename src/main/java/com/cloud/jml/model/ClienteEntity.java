@@ -24,8 +24,8 @@ public class ClienteEntity {
     private String telefono;
     private String direccion;
 
-    @Column(name = "fecha_creacion", nullable = false)
-    private LocalDateTime fechaCreacion = LocalDateTime.now();
+    @Column(name = "fecha_creacion", nullable = false, updatable = false)
+    private LocalDateTime fechaCreacion;
 
     @Column(name = "fecha_actualizacion")
     private LocalDateTime fechaActualizacion;

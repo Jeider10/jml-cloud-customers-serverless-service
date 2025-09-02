@@ -1,6 +1,6 @@
 package com.cloud.jml.config;
 
-import com.cloud.jml.exception.ClienteDuplicadoException;
+//import com.cloud.jml.exception.JwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,12 +13,19 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
+//    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
@@ -30,6 +37,20 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // 🔹 Configuración de CORS global
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:8080")); // front-end
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true); // si se usan cookies o headers de auth
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -37,18 +58,20 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-//                                "/clientes/**", // Permitir acciones en auth sin autenticación
+//                                "/clientes/register", // permitir registro de clientes sin auth
                                 "/css/**",
                                 "/js/**",
                                 "/images/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((request, response, authException) ->
-                                ClienteDuplicadoException.handleAuthError(response, authException))
-                )
+//                .exceptionHandling(ex -> ex
+//                        .authenticationEntryPoint(authenticationEntryPoint)
+//                )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // 🔹 Aplica el CorsConfigurationSource global sin usar http.cors()
+//        http.setSharedObject(CorsConfigurationSource.class, corsConfigurationSource());
 
         return http.build();
     }
