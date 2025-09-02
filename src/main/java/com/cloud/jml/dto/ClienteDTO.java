@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 public class ClienteDTO {
 
     private String identificacion;
-    private String identificacionOriginal;
     private String nombres;
     private String apellidos;
     private String telefono;
@@ -17,9 +16,8 @@ public class ClienteDTO {
         // Constructor
     }
 
-    public ClienteDTO(String identificacion, String identificacionOriginal, String nombres, String apellidos, String telefono, String direccion, LocalDateTime fechaCreacion, LocalDateTime fechaActualizacion) {
+    public ClienteDTO(String identificacion, String nombres, String apellidos, String telefono, String direccion, LocalDateTime fechaCreacion, LocalDateTime fechaActualizacion) {
         this.identificacion = identificacion;
-        this.identificacionOriginal = identificacionOriginal;
         this.nombres = nombres;
         this.apellidos = apellidos;
         this.telefono = telefono;
@@ -35,14 +33,6 @@ public class ClienteDTO {
 
     public void setIdentificacion(String identificacion) {
         this.identificacion = identificacion;
-    }
-
-    public String getIdentificacionOriginal() {
-        return identificacionOriginal;
-    }
-
-    public void setIdentificacionOriginal(String identificacionOriginal) {
-        this.identificacionOriginal = identificacionOriginal;
     }
 
     public String getNombres() {
