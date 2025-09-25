@@ -7,9 +7,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ClienteRepository extends JpaRepository<ClienteEntity, Long> {
-    Optional<ClienteEntity> findByIdentificacion(String identificacion);
+    Optional<ClienteEntity> findByIdentificacion(Long identificacion);
 
     List<ClienteEntity> findByNombres(String nombres);
 
+    List<ClienteEntity> findByNombresContainingIgnoreCase(String nombres);
+
     List<ClienteEntity> findByApellidos(String apellidos);
+
+    List<ClienteEntity> findByApellidosContainingIgnoreCase(String apellidos);
 }
