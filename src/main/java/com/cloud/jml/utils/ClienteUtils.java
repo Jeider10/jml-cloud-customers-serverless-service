@@ -1,24 +1,21 @@
 package com.cloud.jml.utils;
 
 import com.cloud.jml.dto.ClienteRequestDTO;
-import com.cloud.jml.dto.ClienteResponseDTO;
-import com.cloud.jml.exception.ClienteNoEncontradoException;
+import com.cloud.jml.exception.cliente.ClienteNoEncontradoException;
+import com.cloud.jml.exception.cliente.ClientePersistenceException;
 import com.cloud.jml.model.ClienteEntity;
 import com.cloud.jml.repository.ClienteRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.Optional;
 
 @Slf4j
 @Component // 🔹 Anotación para indicar que es un componente de Spring
 public class ClienteUtils {
-
-    private static final DateTimeFormatter FORMATTER =
-            DateTimeFormatter.ofPattern("d/M/yyyy, h:mm:ss a", Locale.of("es", "CO"));
 
     private final ClienteRepository clienteRepository;
 
@@ -27,61 +24,64 @@ public class ClienteUtils {
         log.info("🔥 ClienteUtils inicializado correctamente.");
     }
 
-    public ClienteEntity validarExistenciaCliente(ClienteRequestDTO clienteRequestDTO) {
-        Optional<ClienteEntity> optionalProveedor = clienteRepository.findByIdentificacion(clienteRequestDTO.getIdentificacion());
+    public ClienteEntity guardarClienteBD(ClienteEntity clienteEntity) {
+        try {
+            return clienteRepository.save(clienteEntity);
 
-        if (optionalProveedor.isPresent()) {
+        } catch (DataIntegrityViolationException e) {
+            log.error("🚨 Violación de integridad al guardar el cliente: {}", e.getMessage(), e);
+            throw new ClientePersistenceException("Error de integridad en base de datos al guardar el cliente", e);
+
+        } catch (DataAccessException e) {
+            log.error("🚨 Error de acceso a datos al guardar el cliente: {}", e.getMessage(), e);
+            throw new ClientePersistenceException("Error al guardar el cliente en la base de datos", e);
+
+        } catch (Exception e) {
+            log.error("🚨 Error inesperado al guardar el cliente: {}", e.getMessage(), e);
+            throw new ClientePersistenceException("Error inesperado al registrar el cliente", e);
+        }
+    }
+
+    public void eliminarClienteBD(ClienteEntity clienteEntity) {
+        try {
+            clienteRepository.delete(clienteEntity);
+
+        } catch (DataIntegrityViolationException e) {
+            log.error("🚨 Violación de integridad al eliminar el cliente: {}", e.getMessage(), e);
+            throw new ClientePersistenceException("Error de integridad en base de datos al eliminar el cliente", e);
+
+        } catch (DataAccessException e) {
+            log.error("🚨 Error de acceso a datos al eliminar el cliente: {}", e.getMessage(), e);
+            throw new ClientePersistenceException("Error al eliminar el cliente en la base de datos", e);
+
+        } catch (Exception e) {
+            log.error("🚨 Error inesperado al eliminar el cliente: {}", e.getMessage(), e);
+            throw new ClientePersistenceException("Error inesperado al eliminar el cliente", e);
+        }
+    }
+
+    public ClienteEntity validarExistenciaCliente(ClienteRequestDTO clienteRequestDTO) {
+        Optional<ClienteEntity> optionalCliente = clienteRepository.findByIdentificacion(clienteRequestDTO.getIdentificacion());
+
+        if (optionalCliente.isPresent()) {
+            ClienteEntity clienteEntity = optionalCliente.get();
             log.info("📌 Cliente encontrado con Identificación: {}", clienteRequestDTO.getIdentificacion());
-            return optionalProveedor.get();
+            return clienteEntity;
         } else {
             log.warn("⚠️ Cliente no encontrado con Identificación: {}", clienteRequestDTO.getIdentificacion());
             throw new ClienteNoEncontradoException(clienteRequestDTO.getIdentificacion());
         }
     }
 
-    public void actualizarDatosCliente(ClienteRequestDTO clienteRequestDTO, ClienteEntity proveedorEntity) {
+    public void actualizarDatosCliente(ClienteRequestDTO clienteRequestDTO, ClienteEntity clienteEntity) {
         // Actualizamos solo los campos permitidos
-        proveedorEntity.setIdentificacion(clienteRequestDTO.getIdentificacion());
-        proveedorEntity.setNombres(clienteRequestDTO.getNombres());
-        proveedorEntity.setApellidos(clienteRequestDTO.getApellidos());
-        proveedorEntity.setTelefono(clienteRequestDTO.getTelefono());
-        proveedorEntity.setDireccion(clienteRequestDTO.getDireccion());
+        clienteEntity.setIdentificacion(clienteRequestDTO.getIdentificacion());
+        clienteEntity.setNombres(clienteRequestDTO.getNombres());
+        clienteEntity.setApellidos(clienteRequestDTO.getApellidos());
+        clienteEntity.setTelefono(clienteRequestDTO.getTelefono());
+        clienteEntity.setDireccion(clienteRequestDTO.getDireccion());
 
         // Actualizamos la fecha de actualización
-        proveedorEntity.setFechaActualizacion(LocalDateTime.now());
-    }
-
-    public String formatearFecha(LocalDateTime fecha) {
-        String fechaFormateada = fecha.format(FORMATTER).toLowerCase();
-        log.info("📌 Fecha formateada originalmente: {}", fechaFormateada);
-
-        // Reemplazar y reasignar el valor "a. m." → "a.m." y "p. m." → "p.m."
-        fechaFormateada = fechaFormateada
-                .replace("a. m.", "a.m.")
-                .replace("p. m.", "p.m.");
-
-        log.info("📌 Fecha formateada final: {}", fechaFormateada);
-
-        return fechaFormateada;
-    }
-
-    public void asignarFechasFormateadas(ClienteEntity proveedorEntity, ClienteResponseDTO clienteResponseDTO) {
-        if (proveedorEntity.getFechaCreacion() != null) {
-            String fechaCreacion = formatearFecha(proveedorEntity.getFechaCreacion());
-            log.info("📌 Fecha creación formateada: {}", fechaCreacion);
-
-            clienteResponseDTO.setFechaCreacion(fechaCreacion);
-        } else {
-            clienteResponseDTO.setFechaCreacion(null);
-        }
-
-        if (proveedorEntity.getFechaActualizacion() != null) {
-            String fechaActualizacion = formatearFecha(proveedorEntity.getFechaActualizacion());
-            log.info("📌 Fecha actualización formateada: {}", fechaActualizacion);
-
-            clienteResponseDTO.setFechaActualizacion(fechaActualizacion);
-        } else {
-            clienteResponseDTO.setFechaActualizacion(null);
-        }
+        clienteEntity.setFechaActualizacion(LocalDateTime.now());
     }
 }

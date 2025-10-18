@@ -1,5 +1,6 @@
 package com.cloud.jml.exception;
 
+import com.cloud.jml.exception.cliente.ClienteRuntimeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,19 +13,14 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ClienteDuplicadoException.class)
-    public ResponseEntity<Map<String, Object>> handleClienteDuplicado(ClienteDuplicadoException ex) {
-        return buildErrorResponse(HttpStatus.CONFLICT, "Cliente duplicado", ex.getMessage());
-    }
-
-    @ExceptionHandler(ClienteNoEncontradoException.class)
-    public ResponseEntity<Map<String, Object>> handleClienteNoEncontrado(ClienteNoEncontradoException ex) {
-        return buildErrorResponse(HttpStatus.NOT_FOUND, "Cliente no encontrado", ex.getMessage());
+    @ExceptionHandler(ClienteRuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleClienteErrors(ClienteRuntimeException ex) {
+        return buildErrorResponse(ex.getStatus(), "👤 Error en Cliente", ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno", ex.getMessage());
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "🔥 Error interno", ex.getMessage());
     }
 
     private ResponseEntity<Map<String, Object>> buildErrorResponse(HttpStatus status, String error, String message) {

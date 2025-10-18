@@ -2,8 +2,8 @@ package com.cloud.jml.service;
 
 import com.cloud.jml.dto.ClienteRequestDTO;
 import com.cloud.jml.dto.ClienteResponseDTO;
-import com.cloud.jml.exception.ClienteDuplicadoException;
-import com.cloud.jml.exception.ClienteNoEncontradoException;
+import com.cloud.jml.exception.cliente.ClienteDuplicadoException;
+import com.cloud.jml.exception.cliente.ClienteNoEncontradoException;
 import com.cloud.jml.model.ClienteEntity;
 import com.cloud.jml.repository.ClienteRepository;
 import com.cloud.jml.utils.ClienteMapper;
@@ -29,6 +29,27 @@ public class ClienteService {
         this.mapper = mapper;
         this.clienteUtils = clienteUtils;
         log.info("🔥 ClienteService inicializado correctamente.");
+    }
+
+    @Transactional(readOnly = true)
+    public List<ClienteResponseDTO> listarClientes() {
+        log.info("📌 Inicio de búsqueda de todos los clientes");
+
+        // Paso 1: Obtener entidades desde la BD
+        List<ClienteEntity> clienteEntity = clienteRepository.findAll();
+
+        // Paso 2: Convertir a Stream
+        Stream<ClienteEntity> streamClientes = clienteEntity.stream();
+
+        // Paso 3: Mapear cada entidad a DTO
+        Stream<ClienteResponseDTO> streamDto = streamClientes.map(mapper::mapEntityToResponseDto);
+
+        // Paso 4: Convertir a lista final
+        List<ClienteResponseDTO> clienteResponse = streamDto.toList();
+
+        log.info("📌 Finaliza búsqueda de todos los Clientes. Total encontrados: {}", clienteResponse.size());
+
+        return clienteResponse;
     }
 
     @Transactional
@@ -57,46 +78,27 @@ public class ClienteService {
     }
 
     @Transactional(readOnly = true)
-    public List<ClienteResponseDTO> listarClientes() {
-        log.info("📌 Inicio de búsqueda de todos los clientes");
+    public ClienteResponseDTO obtenerClientePorIdentificacion(ClienteRequestDTO clienteRequestDTO) {
+        log.info("📌 Iniciando búsqueda de cliente con identificación: {}", clienteRequestDTO.getIdentificacion());
 
-        // Paso 1: Obtener entidades desde la BD
-        List<ClienteEntity> clienteEntity = clienteRepository.findAll();
+        Optional<ClienteEntity> optionalCliente = clienteRepository.findByIdentificacion(clienteRequestDTO.getIdentificacion());
 
-        // Paso 2: Convertir a Stream
-        Stream<ClienteEntity> streamClientes = clienteEntity.stream();
-
-        // Paso 3: Mapear cada entidad a DTO
-        Stream<ClienteResponseDTO> streamDto = streamClientes.map(mapper::mapEntityToResponseDto);
-
-        // Paso 4: Convertir a lista final
-        List<ClienteResponseDTO> clienteResponse = streamDto.toList();
-
-        log.info("📌 Finaliza búsqueda de todos los Clientes. Total encontrados: {}", clienteResponse.size());
-
-        return clienteResponse;
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<ClienteResponseDTO> obtenerClientePorIdentificacion(Long identificacion) {
-        log.info("📌 Inicio de búsqueda de cliente por identificacion: {}", identificacion);
-
-        Optional<ClienteEntity> optionalClienteEntity = clienteRepository.findByIdentificacion(identificacion);
-
-        if (optionalClienteEntity.isPresent()) {
-            Optional<ClienteResponseDTO> proveedorResponseDTO = Optional.of(mapper.mapEntityToResponseDto(optionalClienteEntity.get()));
-            log.info("✅ Cliente encontrado con Identificación: {}", identificacion);
-            return proveedorResponseDTO;
-        } else {
-            Optional<ClienteResponseDTO> responseDTO = Optional.empty();
-            log.info("⚠️ Cliente no encontrado con Identificación: {}", identificacion);
-            return responseDTO;
+        if (optionalCliente.isEmpty()) {
+            log.warn("⚠️ Cliente no encontrado con identificación: {}", clienteRequestDTO.getIdentificacion());
+            return null; // Retorna vacío
         }
+
+        ClienteEntity clienteEntity = optionalCliente.get();
+        ClienteResponseDTO clienteResponseDTO = mapper.mapEntityToResponseDto(clienteEntity);
+
+        log.info("✅ Cliente encontrado con identificación: {}", clienteEntity.getIdentificacion());
+
+        return clienteResponseDTO;
     }
 
     @Transactional(readOnly = true)
     public List<ClienteResponseDTO> obtenerClientePorNombres(ClienteRequestDTO clienteRequestDTO) {
-        log.info("📌 Inicio de búsqueda de cliente por nombres: {}", clienteRequestDTO.getNombres());
+        log.info("📌 Iniciando búsqueda de clientes por nombres: {}", clienteRequestDTO.getNombres());
 
         // Paso 1: Buscar entidades por nombre
         List<ClienteEntity> clienteEntity = clienteRepository.findByNombresContainingIgnoreCase(clienteRequestDTO.getNombres());
@@ -124,14 +126,14 @@ public class ClienteService {
 
     @Transactional(readOnly = true)
     public List<ClienteResponseDTO> obtenerClientePorApellidos(ClienteRequestDTO clienteRequestDTO) {
-        log.info("📌 Inicio de búsqueda de cliente por apellidos: {}", clienteRequestDTO.getApellidos());
+        log.info("📌 Inicio de búsqueda de clientes por apellido: {}", clienteRequestDTO.getApellidos());
 
         // Paso 1: Buscar entidades por nombre
         List<ClienteEntity> clienteEntity = clienteRepository.findByApellidosContainingIgnoreCase(clienteRequestDTO.getApellidos());
 
         // Paso 2: Validar si está vacío
         if (clienteEntity.isEmpty()) {
-            log.warn("⚠️ No se encontraron clientes con apellidos: {}", clienteRequestDTO.getApellidos());
+            log.warn("⚠️ No se encontraron clientes con apellido: {}", clienteRequestDTO.getApellidos());
             return List.of(); // Retorna lista vacía
         }
 
@@ -144,7 +146,7 @@ public class ClienteService {
         // Paso 5: Convertir a lista final
         List<ClienteResponseDTO> clientesResponse = streamDto.toList();
 
-        log.info("📌 Finaliza búsqueda de Clientes por apellidos: {}. Total encontrados: {}",
+        log.info("📌 Finaliza búsqueda de clientes por apellido: {}. Total encontrados: {}",
                 clienteRequestDTO.getApellidos(), clientesResponse.size());
 
         return clientesResponse;
@@ -162,12 +164,12 @@ public class ClienteService {
         clienteUtils.actualizarDatosCliente(clienteRequestDTO, clienteEntity);
 
         // Paso 3: Guardar cambios en la BD
-        ClienteEntity actualizado = clienteRepository.save(clienteEntity);
+        ClienteEntity actualizado = clienteUtils.guardarClienteBD(clienteEntity);
         log.info("✅ Cliente actualizado con identificacion: {}", actualizado.getIdentificacion());
 
         // Paso 4: Mapear a DTO
         ClienteResponseDTO clienteResponseDTO = mapper.mapEntityToResponseDto(actualizado);
-        log.info("📌 Finaliza actualización de Proveedor: {} con Codigo de Sucursal: {}",
+        log.info("📌 Finaliza actualización de cliente: {} con identificacion: {}",
                 clienteResponseDTO.getNombres(), clienteResponseDTO.getIdentificacion());
 
         return clienteResponseDTO;
@@ -181,8 +183,10 @@ public class ClienteService {
 
         if (clienteOptional.isPresent()) {
             ClienteEntity clienteEntity = clienteOptional.get();
-            clienteRepository.delete(clienteEntity);
-            log.info("✅ Cliente eliminado con identificacion: {}", clienteRequestDTO.getIdentificacion());
+            log.info("📌 Cliente encontrado con identificacion: {}", clienteRequestDTO.getIdentificacion());
+
+            clienteUtils.eliminarClienteBD(clienteEntity);
+            log.info("🗑️ Cliente: {} con identificacion: {} eliminado correctamente", clienteRequestDTO.getNombres(), clienteRequestDTO.getIdentificacion());
         } else {
             log.warn("⚠️ Cliente no encontrado con identificacion: {}", clienteRequestDTO.getIdentificacion());
             throw new ClienteNoEncontradoException(clienteRequestDTO.getIdentificacion());

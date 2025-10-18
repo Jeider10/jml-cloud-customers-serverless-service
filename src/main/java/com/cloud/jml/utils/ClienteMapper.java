@@ -12,47 +12,46 @@ import java.time.LocalDateTime;
 @Component // 🔹 Anotación para indicar que es un componente de Spring
 public class ClienteMapper {
 
-    private final ClienteUtils clienteUtils;
+    private final ClienteFormatearFecha clienteFormatearFecha;
 
-    public ClienteMapper(ClienteUtils clienteUtils) {
-        this.clienteUtils = clienteUtils;
+    public ClienteMapper(ClienteFormatearFecha clienteFormatearFecha) {
+        this.clienteFormatearFecha = clienteFormatearFecha;
+        log.info("🔥 ClienteMapper inicializado correctamente.");
     }
-
-    // ------------------ 🔹 Métodos de Mapeos ------------------
 
     public ClienteEntity mapRequestDtoToEntity(ClienteRequestDTO clienteRequestDTO) {
-        log.info("📌 Iniciando mapeo DTO a Entity para crear Cliente");
+        log.info("📌 Iniciando mapeo DTO a Entity.");
 
-        ClienteEntity proveedorEntity = new ClienteEntity();
+        ClienteEntity clienteEntity = new ClienteEntity();
 
-        proveedorEntity.setIdentificacion(clienteRequestDTO.getIdentificacion());
-        proveedorEntity.setNombres(clienteRequestDTO.getNombres());
-        proveedorEntity.setApellidos(clienteRequestDTO.getApellidos());
-        proveedorEntity.setTelefono(clienteRequestDTO.getTelefono());
-        proveedorEntity.setDireccion(clienteRequestDTO.getDireccion());
-        proveedorEntity.setFechaCreacion(LocalDateTime.now());
+        clienteEntity.setIdentificacion(clienteRequestDTO.getIdentificacion());
+        clienteEntity.setNombres(clienteRequestDTO.getNombres());
+        clienteEntity.setApellidos(clienteRequestDTO.getApellidos());
+        clienteEntity.setTelefono(clienteRequestDTO.getTelefono());
+        clienteEntity.setDireccion(clienteRequestDTO.getDireccion());
+        clienteEntity.setFechaCreacion(LocalDateTime.now());
 
-        log.info("📌 Finalizando mapeo DTO a Entity para crear Cliente");
+        log.info("📌 Finalizando mapeo DTO a Entity.");
 
-        return proveedorEntity;
+        return clienteEntity;
     }
 
-    public ClienteResponseDTO mapEntityToResponseDto(ClienteEntity proveedorEntity) {
-        log.info("📌 Iniciando mapeo Entity a DTO para crear Cliente");
+    public ClienteResponseDTO mapEntityToResponseDto(ClienteEntity clienteEntity) {
+        log.info("📌 Iniciando mapeo Entity a DTO.");
 
-        ClienteResponseDTO proveedorResponseDTO = new ClienteResponseDTO();
+        ClienteResponseDTO clienteResponseDTO = new ClienteResponseDTO();
 
-        proveedorResponseDTO.setIdentificacion(proveedorEntity.getIdentificacion());
-        proveedorResponseDTO.setNombres(proveedorEntity.getNombres());
-        proveedorResponseDTO.setApellidos(proveedorEntity.getApellidos());
-        proveedorResponseDTO.setTelefono(proveedorEntity.getTelefono());
-        proveedorResponseDTO.setDireccion(proveedorEntity.getDireccion());
+        clienteResponseDTO.setIdentificacion(clienteEntity.getIdentificacion());
+        clienteResponseDTO.setNombres(clienteEntity.getNombres());
+        clienteResponseDTO.setApellidos(clienteEntity.getApellidos());
+        clienteResponseDTO.setTelefono(clienteEntity.getTelefono());
+        clienteResponseDTO.setDireccion(clienteEntity.getDireccion());
 
         // 🔹 Formatear fechas
-        clienteUtils.asignarFechasFormateadas(proveedorEntity, proveedorResponseDTO);
+        clienteFormatearFecha.asignarFechasFormateadas(clienteEntity, clienteResponseDTO);
 
-        log.info("📌 Finalizando mapeo Entity a DTO para crear Cliente");
+        log.info("📌 Finalizando mapeo Entity a DTO.");
 
-        return proveedorResponseDTO;
+        return clienteResponseDTO;
     }
 }
