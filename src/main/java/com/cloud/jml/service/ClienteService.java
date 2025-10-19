@@ -33,162 +33,176 @@ public class ClienteService {
 
     @Transactional(readOnly = true)
     public List<ClienteResponseDTO> listarClientes() {
-        log.info("📌 Inicio de búsqueda de todos los clientes");
+        log.info("🔍 [CONSULTA] Recuperando todos los clientes desde la base de datos");
 
-        // Paso 1: Obtener entidades desde la BD
         List<ClienteEntity> clienteEntity = clienteRepository.findAll();
 
-        // Paso 2: Convertir a Stream
+        if (clienteEntity.isEmpty()) {
+            log.warn("⚠️ [RESULTADO] No se encontraron clientes registrados en la base de datos");
+            return List.of();
+        }
+
+        log.info("📦 [MAPEO] Transformando {} entidades de clientes a DTOs", clienteEntity.size());
+
+        // convertir a stream
         Stream<ClienteEntity> streamClientes = clienteEntity.stream();
 
-        // Paso 3: Mapear cada entidad a DTO
+        // mapear entidades a DTOs
         Stream<ClienteResponseDTO> streamDto = streamClientes.map(mapper::mapEntityToResponseDto);
 
-        // Paso 4: Convertir a lista final
+        // recolectar en lista
         List<ClienteResponseDTO> clienteResponse = streamDto.toList();
 
-        log.info("📌 Finaliza búsqueda de todos los Clientes. Total encontrados: {}", clienteResponse.size());
+        log.info("✅ [FINALIZADO] Total de clientes mapeados y retornados: {}", clienteResponse.size());
 
         return clienteResponse;
     }
 
     @Transactional
     public ClienteResponseDTO crearCliente(ClienteRequestDTO clienteRequestDTO) {
-        log.info("📌 Inicio de creación de cliente: {}", clienteRequestDTO.getNombres());
+        log.info("🔍 [CONSULTA] Inicio de creación de cliente: {}", clienteRequestDTO.getNombres());
 
-        // Verificar si ya existe por identificación
-        Optional<ClienteEntity> byIdentificacion = clienteRepository.findByIdentificacion(clienteRequestDTO.getIdentificacion());
+        Optional<ClienteEntity> clienteExistente = clienteRepository.findByIdentificacion(clienteRequestDTO.getIdentificacion());
 
-        if (byIdentificacion.isPresent()) {
-            log.warn("⚠️ Cliente duplicado: {}", clienteRequestDTO.getIdentificacion());
+        if (clienteExistente.isPresent()) {
+            log.warn("❌ [ERROR] Cliente duplicado detectado: {}", clienteRequestDTO.getIdentificacion());
             throw new ClienteDuplicadoException(clienteRequestDTO.getIdentificacion());
         }
 
-        // Mapeo de DTO a Entity
+        log.info("📦 [MAPEO] Transformando DTO a entidad de cliente");
         ClienteEntity clienteEntity = mapper.mapRequestDtoToEntity(clienteRequestDTO);
+        log.info("📦 [MAPEO] Cliente: {} mapeado a entidad con identificación: {}", clienteEntity.getNombres(), clienteEntity.getIdentificacion());
 
-        // Guardamos en la base de datos
-        ClienteEntity guardado = clienteRepository.save(clienteEntity);
-        log.info("✅ Cliente guardado con Identificacion: {}", guardado.getIdentificacion());
+        ClienteEntity guardarCliente = clienteUtils.guardarClienteBD(clienteEntity);
+        log.info("💾 [PERSISTENCIA] Cliente: {} guardado exitosamente con identificación: {}", guardarCliente.getNombres(), guardarCliente.getIdentificacion());
 
-        ClienteResponseDTO clienteResponseDTO = mapper.mapEntityToResponseDto(guardado);
-        log.info("📌 Finaliza creación de Cliente: {}", clienteResponseDTO.getNombres());
+        log.info("📦 [MAPEO] Transformando entidad de cliente a DTO. (crearCliente)");
+        ClienteResponseDTO clienteResponseDTO = mapper.mapEntityToResponseDto(guardarCliente);
+        log.info("📦 [MAPEO] Cliente mapeado a DTO. identificación: {}, nombres: {}, apellidos: {}",
+                clienteResponseDTO.getIdentificacion(), clienteResponseDTO.getNombres(), clienteResponseDTO.getApellidos());
+
+        log.info("✅ [FINALIZADO] Cliente creado correctamente: {} con identificación {}", clienteResponseDTO.getNombres(), clienteResponseDTO.getIdentificacion());
 
         return clienteResponseDTO;
     }
 
     @Transactional(readOnly = true)
     public ClienteResponseDTO obtenerClientePorIdentificacion(ClienteRequestDTO clienteRequestDTO) {
-        log.info("📌 Iniciando búsqueda de cliente con identificación: {}", clienteRequestDTO.getIdentificacion());
+        log.info("🔍 [CONSULTA] Iniciando búsqueda de cliente con identificación: {}", clienteRequestDTO.getIdentificacion());
 
         Optional<ClienteEntity> optionalCliente = clienteRepository.findByIdentificacion(clienteRequestDTO.getIdentificacion());
 
         if (optionalCliente.isEmpty()) {
-            log.warn("⚠️ Cliente no encontrado con identificación: {}", clienteRequestDTO.getIdentificacion());
-            return null; // Retorna vacío
+            log.warn("❌ [RESULTADO] Cliente no encontrado con identificación: {}", clienteRequestDTO.getIdentificacion());
+            return null;
         }
 
         ClienteEntity clienteEntity = optionalCliente.get();
-        ClienteResponseDTO clienteResponseDTO = mapper.mapEntityToResponseDto(clienteEntity);
+        log.info("📦 [ENCONTRADO] Cliente encontrado -> identificación: {}, nombres: {}, apellidos: {}",
+                clienteEntity.getIdentificacion(), clienteEntity.getNombres(), clienteEntity.getApellidos());
 
-        log.info("✅ Cliente encontrado con identificación: {}", clienteEntity.getIdentificacion());
+        log.info("📦 [MAPEO] Transformando entidad de cliente a DTO. (obtenerClientePorIdentificacion)");
+        ClienteResponseDTO clienteResponseDTO = mapper.mapEntityToResponseDto(clienteEntity);
+        log.info("📦 [MAPEO] Cliente mapeado a DTO con identificación: {}", clienteResponseDTO.getIdentificacion());
+
+        log.info("✅ [FINALIZADO] Cliente encontrado con identificación: {}", clienteResponseDTO.getIdentificacion());
 
         return clienteResponseDTO;
     }
 
     @Transactional(readOnly = true)
     public List<ClienteResponseDTO> obtenerClientePorNombres(ClienteRequestDTO clienteRequestDTO) {
-        log.info("📌 Iniciando búsqueda de clientes por nombres: {}", clienteRequestDTO.getNombres());
+        log.info("🔍 [CONSULTA] Iniciando búsqueda de clientes por nombres: {}", clienteRequestDTO.getNombres());
 
-        // Paso 1: Buscar entidades por nombre
-        List<ClienteEntity> clienteEntity = clienteRepository.findByNombresContainingIgnoreCase(clienteRequestDTO.getNombres());
+        List<ClienteEntity> optionalCliente = clienteRepository.findByNombresContainingIgnoreCase(clienteRequestDTO.getNombres());
 
-        // Paso 2: Validar si está vacío
-        if (clienteEntity.isEmpty()) {
-            log.warn("⚠️ No se encontraron clientes con nombre: {}", clienteRequestDTO.getNombres());
-            return List.of(); // Retorna lista vacía
+        if (optionalCliente.isEmpty()) {
+            log.warn("❌ [RESULTADO] No se encontraron clientes con nombre: {}", clienteRequestDTO.getNombres());
+            return List.of();
         }
 
-        // Paso 3: Convertir a Stream
-        Stream<ClienteEntity> streamClientes = clienteEntity.stream();
+        log.info("📦 [MAPEO] Transformando {} entidades de clientes a DTOs (nombre: {})", optionalCliente.size(), clienteRequestDTO.getNombres());
 
-        // Paso 4: Mapear cada entidad a DTO
+        // convertir a stream
+        Stream<ClienteEntity> streamClientes = optionalCliente.stream();
+
+        // mapear entidades a DTOs
         Stream<ClienteResponseDTO> streamDto = streamClientes.map(mapper::mapEntityToResponseDto);
 
-        // Paso 5: Convertir a lista final
-        List<ClienteResponseDTO> clientesResponse = streamDto.toList();
+        // recolectar en lista
+        List<ClienteResponseDTO> clienteResponse = streamDto.toList();
 
-        log.info("📌 Finaliza búsqueda de Clientes por nombre: {}. Total encontrados: {}",
-                clienteRequestDTO.getNombres(), clientesResponse.size());
+        log.info("✅ [FINALIZADO] Clientes encontrados con nombre: {}. Total encontrados: {}", clienteRequestDTO.getNombres(), clienteResponse.size());
 
-        return clientesResponse;
+        return clienteResponse;
     }
 
     @Transactional(readOnly = true)
     public List<ClienteResponseDTO> obtenerClientePorApellidos(ClienteRequestDTO clienteRequestDTO) {
-        log.info("📌 Inicio de búsqueda de clientes por apellido: {}", clienteRequestDTO.getApellidos());
+        log.info("🔍 [CONSULTA] Inicio de búsqueda de clientes por apellido: {}", clienteRequestDTO.getApellidos());
 
-        // Paso 1: Buscar entidades por nombre
         List<ClienteEntity> clienteEntity = clienteRepository.findByApellidosContainingIgnoreCase(clienteRequestDTO.getApellidos());
 
-        // Paso 2: Validar si está vacío
         if (clienteEntity.isEmpty()) {
-            log.warn("⚠️ No se encontraron clientes con apellido: {}", clienteRequestDTO.getApellidos());
-            return List.of(); // Retorna lista vacía
+            log.warn("❌ [RESULTADO] No se encontraron clientes con apellido: {}", clienteRequestDTO.getApellidos());
+            return List.of();
         }
 
-        // Paso 3: Convertir a Stream
+        log.info("📦 [MAPEO] Transformando {} entidades de clientes a DTOs (apellido: {})", clienteEntity.size(), clienteRequestDTO.getApellidos());
+
+        // convertir a stream
         Stream<ClienteEntity> streamClientes = clienteEntity.stream();
 
-        // Paso 4: Mapear cada entidad a DTO
+        // mapear entidades a DTOs
         Stream<ClienteResponseDTO> streamDto = streamClientes.map(mapper::mapEntityToResponseDto);
 
-        // Paso 5: Convertir a lista final
-        List<ClienteResponseDTO> clientesResponse = streamDto.toList();
+        // recolectar en lista
+        List<ClienteResponseDTO> clienteResponse = streamDto.toList();
 
-        log.info("📌 Finaliza búsqueda de clientes por apellido: {}. Total encontrados: {}",
-                clienteRequestDTO.getApellidos(), clientesResponse.size());
+        log.info("✅ [FINALIZADO] Clientes encontrados con apellido '{}'. Total encontrados: {}", clienteRequestDTO.getApellidos(), clienteResponse.size());
 
-        return clientesResponse;
+        return clienteResponse;
     }
 
     @Transactional
     public ClienteResponseDTO actualizarCliente(ClienteRequestDTO clienteRequestDTO) {
-        log.info("📌 Inicio de actualización de cliente: {} con identificacion: {}",
-                clienteRequestDTO.getNombres(), clienteRequestDTO.getIdentificacion());
+        log.info("🔍 [CONSULTA] Inicio de actualización de cliente: {} con identificación: {}", clienteRequestDTO.getNombres(), clienteRequestDTO.getIdentificacion());
 
         // Paso 1: Validar existencia
         ClienteEntity clienteEntity = clienteUtils.validarExistenciaCliente(clienteRequestDTO);
 
         // Paso 2: Actualizar datos
-        clienteUtils.actualizarDatosCliente(clienteRequestDTO, clienteEntity);
+        mapper.actualizarClienteExistente(clienteRequestDTO, clienteEntity);
 
         // Paso 3: Guardar cambios en la BD
         ClienteEntity actualizado = clienteUtils.guardarClienteBD(clienteEntity);
-        log.info("✅ Cliente actualizado con identificacion: {}", actualizado.getIdentificacion());
+        log.info("💾 [PERSISTENCIA] Cliente actualizado con identificación: {}", actualizado.getIdentificacion());
 
         // Paso 4: Mapear a DTO
+        log.info("📦 [MAPEO] Transformando entidad de cliente a DTO. (actualizarCliente)");
         ClienteResponseDTO clienteResponseDTO = mapper.mapEntityToResponseDto(actualizado);
-        log.info("📌 Finaliza actualización de cliente: {} con identificacion: {}",
-                clienteResponseDTO.getNombres(), clienteResponseDTO.getIdentificacion());
+        log.info("📦 [MAPEO] Cliente mapeado a DTO. identificación: {}, nombres: {}",
+                clienteResponseDTO.getIdentificacion(), clienteResponseDTO.getNombres());
+
+        log.info("✅ [FINALIZADO] Actualización de cliente completada: {} con identificación: {}", clienteResponseDTO.getNombres(), clienteResponseDTO.getIdentificacion());
 
         return clienteResponseDTO;
     }
 
     @Transactional
     public void eliminarCliente(ClienteRequestDTO clienteRequestDTO) {
-        log.info("📌 Inicio de eliminación de cliente con identificacion: {}", clienteRequestDTO.getIdentificacion());
+        log.info("🔍 [CONSULTA] Inicio de eliminación de cliente con identificación: {}", clienteRequestDTO.getIdentificacion());
 
-        Optional<ClienteEntity> clienteOptional = clienteRepository.findByIdentificacion(clienteRequestDTO.getIdentificacion());
+        Optional<ClienteEntity> clienteExistente = clienteRepository.findByIdentificacion(clienteRequestDTO.getIdentificacion());
 
-        if (clienteOptional.isPresent()) {
-            ClienteEntity clienteEntity = clienteOptional.get();
-            log.info("📌 Cliente encontrado con identificacion: {}", clienteRequestDTO.getIdentificacion());
+        if (clienteExistente.isPresent()) {
+            ClienteEntity clienteEntity = clienteExistente.get();
+            log.info("📦 [ENCONTRADO] Cliente localizado -> {} con identificación: {}", clienteEntity.getNombres(), clienteEntity.getIdentificacion());
 
             clienteUtils.eliminarClienteBD(clienteEntity);
-            log.info("🗑️ Cliente: {} con identificacion: {} eliminado correctamente", clienteRequestDTO.getNombres(), clienteRequestDTO.getIdentificacion());
+            log.info("🗑️ [ELIMINADO] Cliente eliminado correctamente -> {} con identificación: {}", clienteEntity.getNombres(), clienteEntity.getIdentificacion());
         } else {
-            log.warn("⚠️ Cliente no encontrado con identificacion: {}", clienteRequestDTO.getIdentificacion());
+            log.warn("❌ [NO ENCONTRADO] Cliente no encontrado con identificación: {}", clienteRequestDTO.getIdentificacion());
             throw new ClienteNoEncontradoException(clienteRequestDTO.getIdentificacion());
         }
     }

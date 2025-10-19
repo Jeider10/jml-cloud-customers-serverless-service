@@ -10,7 +10,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Slf4j
@@ -24,6 +23,9 @@ public class ClienteUtils {
         log.info("🔥 ClienteUtils inicializado correctamente.");
     }
 
+    /**
+     * 💾 Guarda la orden en BD con manejo de excepciones.
+     */
     public ClienteEntity guardarClienteBD(ClienteEntity clienteEntity) {
         try {
             return clienteRepository.save(clienteEntity);
@@ -42,6 +44,9 @@ public class ClienteUtils {
         }
     }
 
+    /**
+     * 🗑️ Elimina la orden de BD con manejo de excepciones.
+     */
     public void eliminarClienteBD(ClienteEntity clienteEntity) {
         try {
             clienteRepository.delete(clienteEntity);
@@ -60,28 +65,20 @@ public class ClienteUtils {
         }
     }
 
+    /**
+     * 🔍 Valida la existencia de un cliente en BD.
+     */
     public ClienteEntity validarExistenciaCliente(ClienteRequestDTO clienteRequestDTO) {
+        log.info("🔍 [SOLICITUD] Validando existencia de cliente: identificación={}", clienteRequestDTO.getIdentificacion());
         Optional<ClienteEntity> optionalCliente = clienteRepository.findByIdentificacion(clienteRequestDTO.getIdentificacion());
 
         if (optionalCliente.isPresent()) {
             ClienteEntity clienteEntity = optionalCliente.get();
-            log.info("📌 Cliente encontrado con Identificación: {}", clienteRequestDTO.getIdentificacion());
+            log.info("✅ [FINALIZADO] Cliente encontrado: identificación={}", clienteEntity.getIdentificacion());
             return clienteEntity;
         } else {
-            log.warn("⚠️ Cliente no encontrado con Identificación: {}", clienteRequestDTO.getIdentificacion());
+            log.warn("⚠️ [RESPUESTA] Cliente no encontrado: identificación={}", clienteRequestDTO.getIdentificacion());
             throw new ClienteNoEncontradoException(clienteRequestDTO.getIdentificacion());
         }
-    }
-
-    public void actualizarDatosCliente(ClienteRequestDTO clienteRequestDTO, ClienteEntity clienteEntity) {
-        // Actualizamos solo los campos permitidos
-        clienteEntity.setIdentificacion(clienteRequestDTO.getIdentificacion());
-        clienteEntity.setNombres(clienteRequestDTO.getNombres());
-        clienteEntity.setApellidos(clienteRequestDTO.getApellidos());
-        clienteEntity.setTelefono(clienteRequestDTO.getTelefono());
-        clienteEntity.setDireccion(clienteRequestDTO.getDireccion());
-
-        // Actualizamos la fecha de actualización
-        clienteEntity.setFechaActualizacion(LocalDateTime.now());
     }
 }

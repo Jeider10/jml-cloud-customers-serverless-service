@@ -13,22 +13,34 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // 👤 Errores de cliente
     @ExceptionHandler(ClienteRuntimeException.class)
     public ResponseEntity<Map<String, Object>> handleClienteErrors(ClienteRuntimeException ex) {
-        return buildErrorResponse(ex.getStatus(), "👤 Error en Cliente", ex.getMessage());
+        return buildErrorResponse(
+                ex.getStatus(),
+                "👤 [CLIENTE] Error en cliente",
+                ex.getMessage()
+        );
     }
 
+    // 🔥 Errores generales no controlados
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "🔥 Error interno", ex.getMessage());
+        return buildErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "🔥 [GENERAL] Error interno del servidor",
+                ex.getMessage()
+        );
     }
 
+    // 🧱 Método común de respuesta
     private ResponseEntity<Map<String, Object>> buildErrorResponse(HttpStatus status, String error, String message) {
         Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
         body.put("status", status.value());
         body.put("error", error);
         body.put("message", message);
-        body.put("timestamp", LocalDateTime.now());
+
         return ResponseEntity.status(status).body(body);
     }
 }

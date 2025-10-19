@@ -19,8 +19,11 @@ public class ClienteMapper {
         log.info("🔥 ClienteMapper inicializado correctamente.");
     }
 
+    /**
+     * 📦 Convierte un DTO de solicitud de cliente en una entidad lista para persistir.
+     */
     public ClienteEntity mapRequestDtoToEntity(ClienteRequestDTO clienteRequestDTO) {
-        log.info("📌 Iniciando mapeo DTO a Entity.");
+        log.info("📦 [MAPEO] Iniciando mapeo DTO → Entity para cliente: identificación={}", clienteRequestDTO.getIdentificacion());
 
         ClienteEntity clienteEntity = new ClienteEntity();
 
@@ -31,13 +34,16 @@ public class ClienteMapper {
         clienteEntity.setDireccion(clienteRequestDTO.getDireccion());
         clienteEntity.setFechaCreacion(LocalDateTime.now());
 
-        log.info("📌 Finalizando mapeo DTO a Entity.");
+        log.info("✅ [MAPEO] Mapeo completado DTO → Entity para cliente: identificación={}", clienteEntity.getIdentificacion());
 
         return clienteEntity;
     }
 
+    /**
+     * 📦 Convierte una entidad de cliente en un DTO de respuesta.
+     */
     public ClienteResponseDTO mapEntityToResponseDto(ClienteEntity clienteEntity) {
-        log.info("📌 Iniciando mapeo Entity a DTO.");
+        log.info("📦 [MAPEO] Iniciando mapeo Entity → DTO para cliente: identificación={}", clienteEntity.getIdentificacion());
 
         ClienteResponseDTO clienteResponseDTO = new ClienteResponseDTO();
 
@@ -47,11 +53,30 @@ public class ClienteMapper {
         clienteResponseDTO.setTelefono(clienteEntity.getTelefono());
         clienteResponseDTO.setDireccion(clienteEntity.getDireccion());
 
-        // 🔹 Formatear fechas
+        // 🕓 Formateo de fechas
         clienteFormatearFecha.asignarFechasFormateadas(clienteEntity, clienteResponseDTO);
 
-        log.info("📌 Finalizando mapeo Entity a DTO.");
+        log.info("✅ [MAPEO] Mapeo completado Entity → DTO para cliente: identificación={}", clienteResponseDTO.getIdentificacion());
 
         return clienteResponseDTO;
+    }
+
+    /**
+     * ✏️ Actualiza una entidad de cliente existente con los datos del DTO.
+     */
+    public void actualizarClienteExistente(ClienteRequestDTO clienteRequestDTO, ClienteEntity clienteEntity) {
+        log.info("✏️ [SOLICITUD] Actualizando cliente existente: identificación={}", clienteEntity.getIdentificacion());
+
+        // Actualizamos solo los campos permitidos
+        clienteEntity.setIdentificacion(clienteRequestDTO.getIdentificacion());
+        clienteEntity.setNombres(clienteRequestDTO.getNombres());
+        clienteEntity.setApellidos(clienteRequestDTO.getApellidos());
+        clienteEntity.setTelefono(clienteRequestDTO.getTelefono());
+        clienteEntity.setDireccion(clienteRequestDTO.getDireccion());
+
+        // Actualizamos la fecha de actualización
+        clienteEntity.setFechaActualizacion(LocalDateTime.now());
+
+        log.info("✅ [FINALIZADO] Cliente actualizado correctamente: identificación={}", clienteEntity.getIdentificacion());
     }
 }
