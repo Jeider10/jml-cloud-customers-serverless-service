@@ -4,6 +4,7 @@ import com.cloud.jml.dto.ClienteRequestDTO;
 import com.cloud.jml.dto.ClienteResponseDTO;
 import com.cloud.jml.service.ClienteService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +13,6 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/clientes")
-@CrossOrigin(origins = "http://localhost:8080")
 public class ClienteController {
 
     private final ClienteService clienteService;
@@ -28,6 +28,11 @@ public class ClienteController {
 
         List<ClienteResponseDTO> clientes = clienteService.listarClientes();
 
+        if (clientes == null || clientes.isEmpty()) {
+            log.warn("📤 [RESPUESTA] No se encontraron clientes");
+            return ResponseEntity.noContent().build();
+        }
+
         log.info("📤 [RESPUESTA] Se retornan {} clientes", clientes.size());
 
         return ResponseEntity.ok(clientes);
@@ -38,6 +43,11 @@ public class ClienteController {
         log.info("📥 [SOLICITUD] Crear cliente: {}", clienteRequestDTO.getNombres());
 
         ClienteResponseDTO response = clienteService.crearCliente(clienteRequestDTO);
+
+        if (response == null || response.getIdentificacion().describeConstable().isEmpty()) {
+            log.warn("📤 [RESPUESTA] Error al crear el cliente: {}", clienteRequestDTO.getNombres());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
 
         log.info("📤 [RESPUESTA] Cliente creado: {} con identificación: {}", response.getNombres(), response.getIdentificacion());
 
@@ -53,6 +63,11 @@ public class ClienteController {
 
         ClienteResponseDTO cliente = clienteService.obtenerClientePorIdentificacion(clienteRequestDTO);
 
+        if (cliente == null || cliente.getIdentificacion().describeConstable().isEmpty()) {
+            log.warn("📤 [RESPUESTA] Cliente no encontrado con identificación: {}", identificacion);
+            return ResponseEntity.noContent().build();
+        }
+
         log.info("📤 [RESPUESTA] Cliente encontrado con identificación: {}", identificacion);
 
         return ResponseEntity.ok(cliente);
@@ -66,6 +81,11 @@ public class ClienteController {
         clienteRequestDTO.setNombres(nombres);
 
         List<ClienteResponseDTO> clientes = clienteService.obtenerClientePorNombres(clienteRequestDTO);
+
+        if (clientes == null || clientes.isEmpty()) {
+            log.warn("📤 [RESPUESTA] Cliente no encontrado con nombre: {}", nombres);
+            return ResponseEntity.noContent().build();
+        }
 
         log.info("📤 [RESPUESTA] Se retornan {} clientes con nombres: {}", clientes.size(), nombres);
 
@@ -81,6 +101,11 @@ public class ClienteController {
 
         List<ClienteResponseDTO> clientes = clienteService.obtenerClientePorApellidos(clienteRequestDTO);
 
+        if (clientes == null || clientes.isEmpty()) {
+            log.warn("📤 [RESPUESTA] Cliente no encontrado con apellido: {}", apellidos);
+            return ResponseEntity.noContent().build();
+        }
+
         log.info("📤 [RESPUESTA] Se retornan {} clientes con apellidos: {}", clientes.size(), apellidos);
 
         return ResponseEntity.ok(clientes);
@@ -91,6 +116,11 @@ public class ClienteController {
         log.info("📥 [SOLICITUD] Actualizar cliente con identificación: {}", clienteRequestDTO.getIdentificacion());
 
         ClienteResponseDTO clienteResponseDTO = clienteService.actualizarCliente(clienteRequestDTO);
+
+        if (clienteResponseDTO == null || clienteResponseDTO.getIdentificacion().describeConstable().isEmpty()) {
+            log.warn("📤 [RESPUESTA] Error al actualizar el cliente con identificación: {}", clienteRequestDTO.getIdentificacion());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
 
         log.info("📤 [RESPUESTA] Cliente actualizado correctamente: {} con identificación: {}", clienteResponseDTO.getNombres(), clienteResponseDTO.getIdentificacion());
 

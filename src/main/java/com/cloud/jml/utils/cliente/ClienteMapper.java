@@ -1,4 +1,4 @@
-package com.cloud.jml.utils;
+package com.cloud.jml.utils.cliente;
 
 import com.cloud.jml.dto.ClienteRequestDTO;
 import com.cloud.jml.dto.ClienteResponseDTO;
@@ -19,9 +19,6 @@ public class ClienteMapper {
         log.info("🔥 ClienteMapper inicializado correctamente.");
     }
 
-    /**
-     * 📦 Convierte un DTO de solicitud de cliente en una entidad lista para persistir.
-     */
     public ClienteEntity mapRequestDtoToEntity(ClienteRequestDTO clienteRequestDTO) {
         log.info("📦 [MAPEO] Iniciando mapeo DTO → Entity para cliente: identificación={}", clienteRequestDTO.getIdentificacion());
 
@@ -39,9 +36,6 @@ public class ClienteMapper {
         return clienteEntity;
     }
 
-    /**
-     * 📦 Convierte una entidad de cliente en un DTO de respuesta.
-     */
     public ClienteResponseDTO mapEntityToResponseDto(ClienteEntity clienteEntity) {
         log.info("📦 [MAPEO] Iniciando mapeo Entity → DTO para cliente: identificación={}", clienteEntity.getIdentificacion());
 
@@ -61,9 +55,6 @@ public class ClienteMapper {
         return clienteResponseDTO;
     }
 
-    /**
-     * ✏️ Actualiza una entidad de cliente existente con los datos del DTO.
-     */
     public void actualizarClienteExistente(ClienteRequestDTO clienteRequestDTO, ClienteEntity clienteEntity) {
         log.info("✏️ [SOLICITUD] Actualizando cliente existente: identificación={}", clienteEntity.getIdentificacion());
 

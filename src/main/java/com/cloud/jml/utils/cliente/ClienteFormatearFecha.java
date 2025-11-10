@@ -1,4 +1,4 @@
-package com.cloud.jml.utils;
+package com.cloud.jml.utils.cliente;
 
 import com.cloud.jml.dto.ClienteResponseDTO;
 import com.cloud.jml.model.ClienteEntity;
@@ -15,6 +15,29 @@ public class ClienteFormatearFecha {
 
     private static final DateTimeFormatter FORMATTER =
             DateTimeFormatter.ofPattern("d/M/yyyy, h:mm:ss a", Locale.of("es", "CO"));
+
+    public ClienteFormatearFecha() {
+        log.info("🔥 ClienteFormatearFecha inicializado correctamente.");
+    }
+
+    public void asignarFechasFormateadas(ClienteEntity clienteEntity, ClienteResponseDTO clienteResponseDTO) {
+        if (clienteEntity == null || clienteResponseDTO == null) {
+            log.warn("⚠️ Entidad o DTO nulos al intentar asignar fechas formateadas.");
+            return;
+        }
+
+        log.info("📦 Asignando fechas formateadas al cliente: {}", clienteEntity.getNombres());
+
+        // Fecha de creación
+        String fechaCreacion = formatearFecha(clienteEntity.getFechaCreacion());
+        clienteResponseDTO.setFechaCreacion(fechaCreacion);
+        log.debug("🕓 Fecha de creación asignada: {}", fechaCreacion);
+
+        // Fecha de actualización
+        String fechaActualizacion = formatearFecha(clienteEntity.getFechaActualizacion());
+        clienteResponseDTO.setFechaActualizacion(fechaActualizacion);
+        log.debug("🕓 Fecha de actualización asignada: {}", fechaActualizacion);
+    }
 
     /**
      * 🕒 Formatea una fecha LocalDateTime al formato colombiano:
@@ -37,28 +60,5 @@ public class ClienteFormatearFecha {
         log.info("🕓 Fecha formateada correctamente: {}", fechaFormateada);
 
         return fechaFormateada;
-    }
-
-    /**
-     * 🧩 Asigna las fechas formateadas (creación y actualización)
-     * desde la entidad a la respuesta DTO.
-     */
-    public void asignarFechasFormateadas(ClienteEntity clienteEntity, ClienteResponseDTO clienteResponseDTO) {
-        if (clienteEntity == null || clienteResponseDTO == null) {
-            log.warn("⚠️ Entidad o DTO nulos al intentar asignar fechas formateadas.");
-            return;
-        }
-
-        log.info("📦 Asignando fechas formateadas al cliente: {}", clienteEntity.getNombres());
-
-        // Fecha de creación
-        String fechaCreacion = formatearFecha(clienteEntity.getFechaCreacion());
-        clienteResponseDTO.setFechaCreacion(fechaCreacion);
-        log.debug("🕓 Fecha de creación asignada: {}", fechaCreacion);
-
-        // Fecha de actualización
-        String fechaActualizacion = formatearFecha(clienteEntity.getFechaActualizacion());
-        clienteResponseDTO.setFechaActualizacion(fechaActualizacion);
-        log.debug("🕓 Fecha de actualización asignada: {}", fechaActualizacion);
     }
 }

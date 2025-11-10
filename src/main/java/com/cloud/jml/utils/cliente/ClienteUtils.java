@@ -1,4 +1,4 @@
-package com.cloud.jml.utils;
+package com.cloud.jml.utils.cliente;
 
 import com.cloud.jml.dto.ClienteRequestDTO;
 import com.cloud.jml.exception.cliente.ClienteNoEncontradoException;
@@ -23,9 +23,20 @@ public class ClienteUtils {
         log.info("🔥 ClienteUtils inicializado correctamente.");
     }
 
-    /**
-     * 💾 Guarda la orden en BD con manejo de excepciones.
-     */
+    public ClienteEntity validarExistenciaCliente(ClienteRequestDTO clienteRequestDTO) {
+        log.info("🔍 [SOLICITUD] Validando existencia de cliente: identificación={}", clienteRequestDTO.getIdentificacion());
+        Optional<ClienteEntity> optionalCliente = clienteRepository.findByIdentificacion(clienteRequestDTO.getIdentificacion());
+
+        if (optionalCliente.isPresent()) {
+            ClienteEntity clienteEntity = optionalCliente.get();
+            log.info("✅ [FINALIZADO] Cliente encontrado: identificación={}", clienteEntity.getIdentificacion());
+            return clienteEntity;
+        } else {
+            log.warn("⚠️ [RESPUESTA] Cliente no encontrado: identificación={}", clienteRequestDTO.getIdentificacion());
+            throw new ClienteNoEncontradoException(clienteRequestDTO.getIdentificacion());
+        }
+    }
+
     public ClienteEntity guardarClienteBD(ClienteEntity clienteEntity) {
         try {
             return clienteRepository.save(clienteEntity);
@@ -44,9 +55,6 @@ public class ClienteUtils {
         }
     }
 
-    /**
-     * 🗑️ Elimina la orden de BD con manejo de excepciones.
-     */
     public void eliminarClienteBD(ClienteEntity clienteEntity) {
         try {
             clienteRepository.delete(clienteEntity);
@@ -62,23 +70,6 @@ public class ClienteUtils {
         } catch (Exception e) {
             log.error("🚨 Error inesperado al eliminar el cliente: {}", e.getMessage(), e);
             throw new ClientePersistenceException("Error inesperado al eliminar el cliente", e);
-        }
-    }
-
-    /**
-     * 🔍 Valida la existencia de un cliente en BD.
-     */
-    public ClienteEntity validarExistenciaCliente(ClienteRequestDTO clienteRequestDTO) {
-        log.info("🔍 [SOLICITUD] Validando existencia de cliente: identificación={}", clienteRequestDTO.getIdentificacion());
-        Optional<ClienteEntity> optionalCliente = clienteRepository.findByIdentificacion(clienteRequestDTO.getIdentificacion());
-
-        if (optionalCliente.isPresent()) {
-            ClienteEntity clienteEntity = optionalCliente.get();
-            log.info("✅ [FINALIZADO] Cliente encontrado: identificación={}", clienteEntity.getIdentificacion());
-            return clienteEntity;
-        } else {
-            log.warn("⚠️ [RESPUESTA] Cliente no encontrado: identificación={}", clienteRequestDTO.getIdentificacion());
-            throw new ClienteNoEncontradoException(clienteRequestDTO.getIdentificacion());
         }
     }
 }

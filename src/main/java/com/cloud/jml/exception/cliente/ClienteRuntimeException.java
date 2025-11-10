@@ -12,4 +12,9 @@ public class ClienteRuntimeException extends RuntimeException {
         super(message);
         this.status = status;
     }
+
+    public ClienteRuntimeException(HttpStatus status, String message, Throwable cause) {
+        super(message, cause);
+        this.status = status;
+    }
 }
