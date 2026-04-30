@@ -16,15 +16,15 @@ public class ClientePersistenceException extends ClienteRuntimeException {
         );
     }
 
-    // 🔒 Violación de integridad (constraint, duplicado, etc.) al guardar
+    // 🔒 Violacion de integridad (constraint, duplicado, etc.) al guardar
     public static ClientePersistenceException integrityViolation(Throwable cause) {
         return new ClientePersistenceException(
-                "❌ [INTEGRIDAD] Violación de integridad en base de datos al guardar el cliente",
+                "❌ [INTEGRIDAD] Violacion de integridad en base de datos al guardar el cliente",
                 cause
         );
     }
 
-    // ⚙️ Error técnico de acceso a datos
+    // ⚙️ Error tecnico de acceso a datos
     public static ClientePersistenceException dataAccessError(Throwable cause) {
         return new ClientePersistenceException(
                 "❌ [DATOS] Error de acceso a datos al intentar guardar el cliente",
@@ -35,7 +35,7 @@ public class ClientePersistenceException extends ClienteRuntimeException {
     // 💥 Error inesperado
     public static ClientePersistenceException unexpected(Throwable cause) {
         return new ClientePersistenceException(
-                "💥 [INESPERADO] Ocurrió un error inesperado al registrar el cliente",
+                "💥 [INESPERADO] Ocurrio un error inesperado al registrar el cliente",
                 cause
         );
     }

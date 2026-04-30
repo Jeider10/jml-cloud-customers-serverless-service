@@ -7,6 +7,6 @@ public class ClienteDuplicadoException extends ClienteRuntimeException {
     public ClienteDuplicadoException(Long identificacion) {
         super(
                 HttpStatus.CONFLICT,
-                "⚠️ [DUPLICADO] Cliente duplicado detectado con identificación: " + identificacion);
+                "⚠️ [DUPLICADO] Cliente duplicado detectado con identificacion: " + identificacion);
     }
 }

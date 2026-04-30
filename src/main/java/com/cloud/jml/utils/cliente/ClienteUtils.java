@@ -1,6 +1,7 @@
 package com.cloud.jml.utils.cliente;
 
 import com.cloud.jml.dto.ClienteRequestDTO;
+import com.cloud.jml.exception.cliente.ClienteDeletionException;
 import com.cloud.jml.exception.cliente.ClienteNoEncontradoException;
 import com.cloud.jml.exception.cliente.ClientePersistenceException;
 import com.cloud.jml.model.ClienteEntity;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Slf4j
-@Component // 🔹 Anotación para indicar que es un componente de Spring
+@Component // 🔹 Anotacion para indicar que es un componente de Spring
 public class ClienteUtils {
 
     private final ClienteRepository clienteRepository;
@@ -24,15 +25,15 @@ public class ClienteUtils {
     }
 
     public ClienteEntity validarExistenciaCliente(ClienteRequestDTO clienteRequestDTO) {
-        log.info("🔍 [SOLICITUD] Validando existencia de cliente: identificación={}", clienteRequestDTO.getIdentificacion());
+        log.info("🔍 [SOLICITUD] Validando existencia de cliente: identificacion={}", clienteRequestDTO.getIdentificacion());
         Optional<ClienteEntity> optionalCliente = clienteRepository.findByIdentificacion(clienteRequestDTO.getIdentificacion());
 
         if (optionalCliente.isPresent()) {
             ClienteEntity clienteEntity = optionalCliente.get();
-            log.info("✅ [FINALIZADO] Cliente encontrado: identificación={}", clienteEntity.getIdentificacion());
+            log.info("✅ [FINALIZADO] Cliente encontrado: identificacion={}", clienteEntity.getIdentificacion());
             return clienteEntity;
         } else {
-            log.warn("⚠️ [RESPUESTA] Cliente no encontrado: identificación={}", clienteRequestDTO.getIdentificacion());
+            log.warn("⚠️ [RESPUESTA] Cliente no encontrado: identificacion={}", clienteRequestDTO.getIdentificacion());
             throw new ClienteNoEncontradoException(clienteRequestDTO.getIdentificacion());
         }
     }
@@ -42,16 +43,16 @@ public class ClienteUtils {
             return clienteRepository.save(clienteEntity);
 
         } catch (DataIntegrityViolationException e) {
-            log.error("🚨 Violación de integridad al guardar el cliente: {}", e.getMessage(), e);
-            throw new ClientePersistenceException("Error de integridad en base de datos al guardar el cliente", e);
+            log.error("🚨 Violacion de integridad al guardar el cliente: {}", e.getMessage(), e);
+            throw ClientePersistenceException.integrityViolation(e);
 
         } catch (DataAccessException e) {
             log.error("🚨 Error de acceso a datos al guardar el cliente: {}", e.getMessage(), e);
-            throw new ClientePersistenceException("Error al guardar el cliente en la base de datos", e);
+            throw ClientePersistenceException.dataAccessError(e);
 
         } catch (Exception e) {
             log.error("🚨 Error inesperado al guardar el cliente: {}", e.getMessage(), e);
-            throw new ClientePersistenceException("Error inesperado al registrar el cliente", e);
+            throw ClientePersistenceException.unexpected(e);
         }
     }
 
@@ -60,16 +61,16 @@ public class ClienteUtils {
             clienteRepository.delete(clienteEntity);
 
         } catch (DataIntegrityViolationException e) {
-            log.error("🚨 Violación de integridad al eliminar el cliente: {}", e.getMessage(), e);
-            throw new ClientePersistenceException("Error de integridad en base de datos al eliminar el cliente", e);
+            log.error("🚨 Violacion de integridad al eliminar el cliente: {}", e.getMessage(), e);
+            throw ClienteDeletionException.integrityViolation(e);
 
         } catch (DataAccessException e) {
             log.error("🚨 Error de acceso a datos al eliminar el cliente: {}", e.getMessage(), e);
-            throw new ClientePersistenceException("Error al eliminar el cliente en la base de datos", e);
+            throw ClienteDeletionException.dataAccessError(e);
 
         } catch (Exception e) {
             log.error("🚨 Error inesperado al eliminar el cliente: {}", e.getMessage(), e);
-            throw new ClientePersistenceException("Error inesperado al eliminar el cliente", e);
+            throw ClienteDeletionException.unexpected(e);
         }
     }
 }

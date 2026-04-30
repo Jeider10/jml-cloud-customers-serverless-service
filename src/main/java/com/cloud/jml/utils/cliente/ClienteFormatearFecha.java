@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 @Slf4j
-@Component // 🔹 Anotación para indicar que es un componente de Spring
+@Component // 🔹 Anotacion para indicar que es un componente de Spring
 public class ClienteFormatearFecha {
 
     private static final DateTimeFormatter FORMATTER =
@@ -28,15 +28,15 @@ public class ClienteFormatearFecha {
 
         log.info("📦 Asignando fechas formateadas al cliente: {}", clienteEntity.getNombres());
 
-        // Fecha de creación
+        // Fecha de creacion
         String fechaCreacion = formatearFecha(clienteEntity.getFechaCreacion());
         clienteResponseDTO.setFechaCreacion(fechaCreacion);
-        log.debug("🕓 Fecha de creación asignada: {}", fechaCreacion);
+        log.debug("🕓 Fecha de creacion asignada: {}", fechaCreacion);
 
-        // Fecha de actualización
+        // Fecha de actualizacion
         String fechaActualizacion = formatearFecha(clienteEntity.getFechaActualizacion());
         clienteResponseDTO.setFechaActualizacion(fechaActualizacion);
-        log.debug("🕓 Fecha de actualización asignada: {}", fechaActualizacion);
+        log.debug("🕓 Fecha de actualizacion asignada: {}", fechaActualizacion);
     }
 
     /**

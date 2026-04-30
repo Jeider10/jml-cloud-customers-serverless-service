@@ -9,12 +9,12 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
-@Slf4j@SpringBootApplication(scanBasePackages = "com.cloud.jml")
+@Slf4j
+@SpringBootApplication(scanBasePackages = "com.cloud.jml")
 @EnableJpaRepositories(basePackages = "com.cloud.jml")
 @EntityScan(basePackages = "com.cloud.jml")
 public class Application {
-
-    public static final String MICRO_NAME = "M i c r o  -  C u s t o r m e r s";
+    public static final String MICRO_NAME = "M i c r o  -  C u s t o m e r s";
 
     static void main(String[] args) {
 
