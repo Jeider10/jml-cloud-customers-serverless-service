@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -160,6 +161,31 @@ public class ClienteService {
         List<ClienteResponseDTO> clienteResponse = streamDto.toList();
 
         log.info("✅ [FINALIZADO] Clientes encontrados con apellido '{}'. Total encontrados: {}", clienteRequestDTO.getApellidos(), clienteResponse.size());
+
+        return clienteResponse;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ClienteResponseDTO> obtenerClientePorFechaCreacion(String fechaInicio, String fechaFin) {
+        log.info("🔍 [CONSULTA] Iniciando busqueda de clientes por rango de fecha de creacion: {} - {}", fechaInicio, fechaFin);
+
+        LocalDateTime inicio = clienteUtils.parsearFechaInicio(fechaInicio);
+        LocalDateTime fin = clienteUtils.parsearFechaFin(fechaFin);
+
+        log.info("📅 [RANGO] Buscando clientes entre {} y {}", inicio, fin);
+
+        List<ClienteEntity> clienteEntity = clienteRepository.findByFechaCreacionBetween(inicio, fin);
+
+        if (clienteEntity.isEmpty()) {
+            log.warn("❌ [RESULTADO] No se encontraron clientes en el rango de fechas: {} - {}", inicio, fin);
+            return List.of();
+        }
+
+        List<ClienteResponseDTO> clienteResponse = clienteEntity.stream()
+                .map(mapper::mapEntityToResponseDto)
+                .toList();
+
+        log.info("✅ [FINALIZADO] Clientes encontrados en rango de fechas. Total: {}", clienteResponse.size());
 
         return clienteResponse;
     }

@@ -112,6 +112,25 @@ public class ClienteController {
         return ResponseEntity.ok(clientes);
     }
 
+    @GetMapping("/fechaCreacion")
+    public ResponseEntity<List<ClienteResponseDTO>> obtenerClientePorFechaCreacion(
+            @RequestParam("fechaInicio") String fechaInicio,
+            @RequestParam("fechaFin") String fechaFin) {
+
+        log.info("📥 [SOLICITUD] Buscar clientes por rango de fecha de creacion: {} - {}", fechaInicio, fechaFin);
+
+        List<ClienteResponseDTO> clientesFecha = clienteService.obtenerClientePorFechaCreacion(fechaInicio, fechaFin);
+
+        if (clientesFecha == null || clientesFecha.isEmpty()) {
+            log.warn("⚠️ [RESPUESTA] No se encontraron clientes en el rango de fechas.");
+            return ResponseEntity.noContent().build();
+        }
+
+        log.info("📤 [RESPUESTA] Se retornan {} clientes en el rango de fechas.", clientesFecha.size());
+
+        return ResponseEntity.ok(clientesFecha);
+    }
+
     @PutMapping("/update")
     public ResponseEntity<ClienteResponseDTO> actualizarCliente(@RequestBody @Valid ClienteRequestDTO clienteRequestDTO) {
         log.info("📥 [SOLICITUD] Actualizar cliente con identificacion: {}", clienteRequestDTO.getIdentificacion());
