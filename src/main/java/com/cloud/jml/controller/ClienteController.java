@@ -131,6 +131,22 @@ public class ClienteController {
         return ResponseEntity.ok(clientesFecha);
     }
 
+    @GetMapping("/direccion")
+    public ResponseEntity<List<ClienteResponseDTO>> obtenerClientePorDireccion(@RequestParam("direccion") String direccion) {
+        log.info("📥 [SOLICITUD] Buscar clientes por direccion: {}", direccion);
+
+        List<ClienteResponseDTO> clientesDireccion = clienteService.obtenerClientePorDireccion(direccion);
+
+        if (clientesDireccion == null || clientesDireccion.isEmpty()) {
+            log.warn("⚠️ [RESPUESTA] No se encontraron clientes con direccion: {}", direccion);
+            return ResponseEntity.noContent().build();
+        }
+
+        log.info("📤 [RESPUESTA] Se retornan {} clientes con direccion: {}", clientesDireccion.size(), direccion);
+
+        return ResponseEntity.ok(clientesDireccion);
+    }
+
     @PutMapping("/update")
     public ResponseEntity<ClienteResponseDTO> actualizarCliente(@RequestBody @Valid ClienteRequestDTO clienteRequestDTO) {
         log.info("📥 [SOLICITUD] Actualizar cliente con identificacion: {}", clienteRequestDTO.getIdentificacion());

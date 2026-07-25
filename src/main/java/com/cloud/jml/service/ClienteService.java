@@ -190,6 +190,26 @@ public class ClienteService {
         return clienteResponse;
     }
 
+    @Transactional(readOnly = true)
+    public List<ClienteResponseDTO> obtenerClientePorDireccion(String direccion) {
+        log.info("🔍 [CONSULTA] Iniciando busqueda de clientes por direccion: {}", direccion);
+
+        List<ClienteEntity> clienteEntity = clienteRepository.findByDireccionContainingIgnoreCase(direccion);
+
+        if (clienteEntity.isEmpty()) {
+            log.warn("❌ [RESULTADO] No se encontraron clientes con direccion: {}", direccion);
+            return List.of();
+        }
+
+        List<ClienteResponseDTO> clienteResponse = clienteEntity.stream()
+                .map(mapper::mapEntityToResponseDto)
+                .toList();
+
+        log.info("✅ [FINALIZADO] Clientes encontrados por direccion '{}'. Total: {}", direccion, clienteResponse.size());
+
+        return clienteResponse;
+    }
+
     @Transactional
     public ClienteResponseDTO actualizarCliente(ClienteRequestDTO clienteRequestDTO) {
         log.info("🔍 [CONSULTA] Inicio de actualizacion de cliente: {} con identificacion: {}", clienteRequestDTO.getNombres(), clienteRequestDTO.getIdentificacion());
