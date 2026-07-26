@@ -1,0 +1,9 @@
+=====================================
+ JML Cloud - Customers Service
+ Historial de Cambios
+=====================================
+
+[1.0.0-SNAPSHOT] - 2026-07-26 - (Jeider Montiel)
+  - Version inicial del servicio de clientes.
+  - CRUD completo de clientes.
+  - Busqueda y filtrado de clientes.
