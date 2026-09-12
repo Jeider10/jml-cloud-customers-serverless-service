@@ -14,16 +14,20 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableJpaRepositories(basePackages = "com.cloud.jml")
 @EntityScan(basePackages = "com.cloud.jml")
 public class Application {
+
     public static final String MICRO_NAME = "M i c r o  -  C u s t o m e r s";
 
-    static void main(String[] args) {
-
-        log.info("Hello, World!");
+    public static void main(String[] args) {
 
         SpringApplication app = new SpringApplication(Application.class);
-
         app.setBanner(new DynamicBanner(MICRO_NAME));
-
         app.run(args);
+
+        log.info("=======================================================");
+        log.info("  ✅  jml-cloud-customers-serverless-service  ONLINE");
+        log.info("  👥  Servicio de gestion de clientes");
+        log.info("  🌐  Puerto : 1082  →  http://localhost:1082");
+        log.info("  📊  Actuator: http://localhost:1082/actuator/health");
+        log.info("=======================================================");
     }
 }
