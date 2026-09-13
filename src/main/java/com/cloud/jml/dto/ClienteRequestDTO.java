@@ -31,4 +31,7 @@ public class ClienteRequestDTO {
 
     @Size(max = 200, message = "El campo 'direccion' no puede exceder 200 caracteres")
     private String direccion;
+
+    @Size(max = 150, message = "El campo 'correo' no puede exceder 150 caracteres")
+    private String correo;
 }

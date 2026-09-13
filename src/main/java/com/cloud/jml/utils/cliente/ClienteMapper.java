@@ -29,6 +29,7 @@ public class ClienteMapper {
         clienteEntity.setApellidos(clienteRequestDTO.getApellidos());
         clienteEntity.setTelefono(clienteRequestDTO.getTelefono());
         clienteEntity.setDireccion(clienteRequestDTO.getDireccion());
+        clienteEntity.setCorreo(clienteRequestDTO.getCorreo());
         clienteEntity.setFechaCreacion(LocalDateTime.now());
 
         log.info("✅ [MAPEO] Mapeo completado DTO → Entity para cliente: identificacion={}", clienteEntity.getIdentificacion());
@@ -46,6 +47,7 @@ public class ClienteMapper {
         clienteResponseDTO.setApellidos(clienteEntity.getApellidos());
         clienteResponseDTO.setTelefono(clienteEntity.getTelefono());
         clienteResponseDTO.setDireccion(clienteEntity.getDireccion());
+        clienteResponseDTO.setCorreo(clienteEntity.getCorreo());
 
         // 🕓 Formateo de fechas
         clienteFormatearFecha.asignarFechasFormateadas(clienteEntity, clienteResponseDTO);
@@ -64,6 +66,7 @@ public class ClienteMapper {
         clienteEntity.setApellidos(clienteRequestDTO.getApellidos());
         clienteEntity.setTelefono(clienteRequestDTO.getTelefono());
         clienteEntity.setDireccion(clienteRequestDTO.getDireccion());
+        clienteEntity.setCorreo(clienteRequestDTO.getCorreo());
 
         // Actualizamos la fecha de actualizacion
         clienteEntity.setFechaActualizacion(LocalDateTime.now());
