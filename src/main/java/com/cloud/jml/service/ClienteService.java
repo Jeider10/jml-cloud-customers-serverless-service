@@ -191,6 +191,29 @@ public class ClienteService {
     }
 
     @Transactional(readOnly = true)
+    public List<ClienteResponseDTO> obtenerClientePorFechaActualizacion(String fechaInicio, String fechaFin) {
+        log.info("🔍 [CONSULTA] Iniciando busqueda de clientes por rango de fecha de actualizacion: {} - {}", fechaInicio, fechaFin);
+
+        LocalDateTime inicio = clienteUtils.parsearFechaInicio(fechaInicio);
+        LocalDateTime fin = clienteUtils.parsearFechaFin(fechaFin);
+
+        List<ClienteEntity> clienteEntity = clienteRepository.findByFechaActualizacionBetween(inicio, fin);
+
+        if (clienteEntity.isEmpty()) {
+            log.warn("❌ [RESULTADO] No se encontraron clientes en el rango de fecha de actualizacion.");
+            return List.of();
+        }
+
+        List<ClienteResponseDTO> clienteResponse = clienteEntity.stream()
+                .map(mapper::mapEntityToResponseDto)
+                .toList();
+
+        log.info("✅ [FINALIZADO] Clientes encontrados por fecha de actualizacion. Total: {}", clienteResponse.size());
+
+        return clienteResponse;
+    }
+
+    @Transactional(readOnly = true)
     public List<ClienteResponseDTO> obtenerClientePorDireccion(String direccion) {
         log.info("🔍 [CONSULTA] Iniciando busqueda de clientes por direccion: {}", direccion);
 

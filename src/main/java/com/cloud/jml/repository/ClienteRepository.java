@@ -20,5 +20,7 @@ public interface ClienteRepository extends JpaRepository<ClienteEntity, Long> {
 
     List<ClienteEntity> findByFechaCreacionBetween(LocalDateTime inicio, LocalDateTime fin);
 
+    List<ClienteEntity> findByFechaActualizacionBetween(LocalDateTime inicio, LocalDateTime fin);
+
     List<ClienteEntity> findByDireccionContainingIgnoreCase(String direccion);
 }
