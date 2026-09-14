@@ -1,5 +1,6 @@
 package com.cloud.jml.utils.cliente;
 
+import com.cloud.jml.dto.ClientePapeleraResponseDTO;
 import com.cloud.jml.dto.ClienteRequestDTO;
 import com.cloud.jml.dto.ClienteResponseDTO;
 import com.cloud.jml.model.ClienteEntity;
@@ -32,6 +33,7 @@ public class ClienteMapper {
         clienteEntity.setCorreo(clienteRequestDTO.getCorreo());
         clienteEntity.setCreadoPor(clienteRequestDTO.getCreadoPor());
         clienteEntity.setFechaCreacion(LocalDateTime.now());
+        clienteEntity.setEliminado(false);
 
         log.info("✅ [MAPEO] Mapeo completado DTO → Entity para cliente: identificacion={}", clienteEntity.getIdentificacion());
 
@@ -57,6 +59,28 @@ public class ClienteMapper {
         log.info("✅ [MAPEO] Mapeo completado Entity → DTO para cliente: identificacion={}", clienteResponseDTO.getIdentificacion());
 
         return clienteResponseDTO;
+    }
+
+    public ClientePapeleraResponseDTO mapEntityToPapeleraDto(ClienteEntity clienteEntity) {
+        log.info("📦 [MAPEO] Iniciando mapeo Entity → PapeleraDTO para cliente: identificacion={}", clienteEntity.getIdentificacion());
+
+        ClientePapeleraResponseDTO dto = new ClientePapeleraResponseDTO();
+
+        dto.setIdentificacion(clienteEntity.getIdentificacion());
+        dto.setNombres(clienteEntity.getNombres());
+        dto.setApellidos(clienteEntity.getApellidos());
+        dto.setTelefono(clienteEntity.getTelefono());
+        dto.setDireccion(clienteEntity.getDireccion());
+        dto.setCorreo(clienteEntity.getCorreo());
+        dto.setCreadoPor(clienteEntity.getCreadoPor());
+        dto.setFechaCreacion(clienteFormatearFecha.formatearFecha(clienteEntity.getFechaCreacion()));
+        dto.setFechaEliminacion(clienteFormatearFecha.formatearFecha(clienteEntity.getFechaEliminacion()));
+        dto.setEliminadoPorId(clienteEntity.getEliminadoPorId());
+        dto.setEliminadoPorNombre(clienteEntity.getEliminadoPorNombre());
+
+        log.info("✅ [MAPEO] Mapeo papelera completado para cliente: identificacion={}", dto.getIdentificacion());
+
+        return dto;
     }
 
     public void actualizarClienteExistente(ClienteRequestDTO clienteRequestDTO, ClienteEntity clienteEntity) {

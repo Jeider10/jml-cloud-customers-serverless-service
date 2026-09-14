@@ -30,7 +30,7 @@ public class ClienteUtils {
 
     public ClienteEntity validarExistenciaCliente(ClienteRequestDTO clienteRequestDTO) {
         log.info("🔍 [SOLICITUD] Validando existencia de cliente: identificacion={}", clienteRequestDTO.getIdentificacion());
-        Optional<ClienteEntity> optionalCliente = clienteRepository.findByIdentificacion(clienteRequestDTO.getIdentificacion());
+        Optional<ClienteEntity> optionalCliente = clienteRepository.findByIdentificacionAndEliminadoFalse(clienteRequestDTO.getIdentificacion());
 
         if (optionalCliente.isPresent()) {
             ClienteEntity clienteEntity = optionalCliente.get();

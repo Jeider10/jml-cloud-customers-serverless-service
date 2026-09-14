@@ -8,19 +8,31 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ClienteRepository extends JpaRepository<ClienteEntity, Long> {
+
+    // ─── Activos (eliminado = false) ─────────────────────────────────────────
+    Optional<ClienteEntity> findByIdentificacionAndEliminadoFalse(Long identificacion);
+
+    List<ClienteEntity> findAllByEliminadoFalse();
+
+    List<ClienteEntity> findByNombresContainingIgnoreCaseAndEliminadoFalse(String nombres);
+
+    List<ClienteEntity> findByApellidosContainingIgnoreCaseAndEliminadoFalse(String apellidos);
+
+    List<ClienteEntity> findByDireccionContainingIgnoreCaseAndEliminadoFalse(String direccion);
+
+    List<ClienteEntity> findByCorreoContainingIgnoreCaseAndEliminadoFalse(String correo);
+
+    List<ClienteEntity> findByCreadoPorContainingIgnoreCaseAndEliminadoFalse(String creadoPor);
+
+    List<ClienteEntity> findByFechaCreacionBetweenAndEliminadoFalse(LocalDateTime inicio, LocalDateTime fin);
+
+    List<ClienteEntity> findByFechaActualizacionBetweenAndEliminadoFalse(LocalDateTime inicio, LocalDateTime fin);
+
+    // ─── Papelera (eliminado = true) ─────────────────────────────────────────
+    List<ClienteEntity> findAllByEliminadoTrue();
+
+    Optional<ClienteEntity> findByIdentificacionAndEliminadoTrue(Long identificacion);
+
+    // ─── Verificar duplicado ignorando eliminados ─────────────────────────────
     Optional<ClienteEntity> findByIdentificacion(Long identificacion);
-
-    List<ClienteEntity> findByNombres(String nombres);
-
-    List<ClienteEntity> findByNombresContainingIgnoreCase(String nombres);
-
-    List<ClienteEntity> findByApellidos(String apellidos);
-
-    List<ClienteEntity> findByApellidosContainingIgnoreCase(String apellidos);
-
-    List<ClienteEntity> findByFechaCreacionBetween(LocalDateTime inicio, LocalDateTime fin);
-
-    List<ClienteEntity> findByFechaActualizacionBetween(LocalDateTime inicio, LocalDateTime fin);
-
-    List<ClienteEntity> findByDireccionContainingIgnoreCase(String direccion);
 }
