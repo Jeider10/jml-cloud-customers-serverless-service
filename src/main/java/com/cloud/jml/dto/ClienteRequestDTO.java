@@ -34,4 +34,7 @@ public class ClienteRequestDTO {
 
     @Size(max = 150, message = "El campo 'correo' no puede exceder 150 caracteres")
     private String correo;
+
+    @Size(max = 150, message = "El campo 'creadoPor' no puede exceder 150 caracteres")
+    private String creadoPor;
 }
