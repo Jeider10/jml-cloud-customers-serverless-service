@@ -53,7 +53,7 @@ public class ClienteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // ─── Buscar por identificación ────────────────────────────────────────────
+    // ─── Buscar por identificacion ────────────────────────────────────────────
     @GetMapping("/identificacion")
     public ResponseEntity<ClienteResponseDTO> obtenerClientePorIdentificacion(@RequestParam("identificacion") Long identificacion) {
         log.info("📥 [SOLICITUD] Buscar cliente por identificacion: {}", identificacion);
@@ -97,7 +97,7 @@ public class ClienteController {
         return ResponseEntity.ok(clientes);
     }
 
-    // ─── Buscar por dirección ─────────────────────────────────────────────────
+    // ─── Buscar por direccion ─────────────────────────────────────────────────
     @GetMapping("/direccion")
     public ResponseEntity<List<ClienteResponseDTO>> obtenerClientePorDireccion(@RequestParam("direccion") String direccion) {
         log.info("📥 [SOLICITUD] Buscar clientes por direccion: {}", direccion);
@@ -145,7 +145,7 @@ public class ClienteController {
         return ResponseEntity.ok(clientes);
     }
 
-    // ─── Buscar por fecha de creación ─────────────────────────────────────────
+    // ─── Buscar por fecha de creacion ─────────────────────────────────────────
     @GetMapping("/fechaCreacion")
     public ResponseEntity<List<ClienteResponseDTO>> obtenerClientePorFechaCreacion(
             @RequestParam("fechaInicio") String fechaInicio,
@@ -164,7 +164,7 @@ public class ClienteController {
         return ResponseEntity.ok(clientes);
     }
 
-    // ─── Buscar por fecha de actualización ───────────────────────────────────
+    // ─── Buscar por fecha de actualizacion ───────────────────────────────────
     @GetMapping("/fechaActualizacion")
     public ResponseEntity<List<ClienteResponseDTO>> obtenerClientePorFechaActualizacion(
             @RequestParam("fechaInicio") String fechaInicio,
@@ -249,5 +249,43 @@ public class ClienteController {
         log.info("📤 [RESPUESTA] Cliente {} eliminado definitivamente", identificacion);
 
         return ResponseEntity.ok().build();
+    }
+
+    // ─── Filtrar papelera por fecha de eliminacion ────────────────────────────
+    @GetMapping("/trash/fecha")
+    public ResponseEntity<List<ClientePapeleraResponseDTO>> listarPapeleraPorFecha(
+            @RequestParam("fechaInicio") String fechaInicio,
+            @RequestParam("fechaFin") String fechaFin) {
+
+        log.info("📥 [SOLICITUD] Filtrar papelera de clientes por fecha: {} - {}", fechaInicio, fechaFin);
+
+
+        List<ClientePapeleraResponseDTO> resultado = clienteService.listarPapeleraPorFecha(fechaInicio, fechaFin);
+
+        if (resultado.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        log.info("📤 [RESPUESTA] {} clientes en papelera en el rango de fechas", resultado.size());
+
+        return ResponseEntity.ok(resultado);
+    }
+
+    // ─── Filtrar papelera por quien elimino ───────────────────────────────────
+    @GetMapping("/trash/eliminadoPor")
+    public ResponseEntity<List<ClientePapeleraResponseDTO>> listarPapeleraPorEliminadoPor(
+            @RequestParam("eliminadoPorId") String eliminadoPorId) {
+
+        log.info("📥 [SOLICITUD] Filtrar papelera de clientes por eliminadoPorId: {}", eliminadoPorId);
+
+        List<ClientePapeleraResponseDTO> resultado = clienteService.listarPapeleraPorEliminadoPor(eliminadoPorId);
+
+        if (resultado.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        log.info("📤 [RESPUESTA] {} clientes en papelera eliminados por: {}", resultado.size(), eliminadoPorId);
+
+        return ResponseEntity.ok(resultado);
     }
 }

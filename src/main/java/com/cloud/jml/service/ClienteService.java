@@ -120,7 +120,7 @@ public class ClienteService {
         return entidades.stream().map(mapper::mapEntityToResponseDto).toList();
     }
 
-    // ─── Buscar por dirección ─────────────────────────────────────────────────
+    // ─── Buscar por direccion ─────────────────────────────────────────────────
     @Transactional(readOnly = true)
     public List<ClienteResponseDTO> obtenerClientePorDireccion(String direccion) {
         log.info("🔍 [CONSULTA] Buscando clientes por direccion: {}", direccion);
@@ -165,7 +165,7 @@ public class ClienteService {
         return entidades.stream().map(mapper::mapEntityToResponseDto).toList();
     }
 
-    // ─── Buscar por fecha de creación ─────────────────────────────────────────
+    // ─── Buscar por fecha de creacion ─────────────────────────────────────────
     @Transactional(readOnly = true)
     public List<ClienteResponseDTO> obtenerClientePorFechaCreacion(String fechaInicio, String fechaFin) {
         log.info("🔍 [CONSULTA] Buscando clientes por rango de fecha de creacion: {} - {}", fechaInicio, fechaFin);
@@ -183,7 +183,7 @@ public class ClienteService {
         return entidades.stream().map(mapper::mapEntityToResponseDto).toList();
     }
 
-    // ─── Buscar por fecha de actualización ───────────────────────────────────
+    // ─── Buscar por fecha de actualizacion ───────────────────────────────────
     @Transactional(readOnly = true)
     public List<ClienteResponseDTO> obtenerClientePorFechaActualizacion(String fechaInicio, String fechaFin) {
         log.info("🔍 [CONSULTA] Buscando clientes por rango de fecha de actualizacion: {} - {}", fechaInicio, fechaFin);
@@ -291,5 +291,36 @@ public class ClienteService {
         clienteUtils.eliminarClienteBD(entidad);
 
         log.info("🗑️ [ELIMINADO] Cliente eliminado definitivamente: {}", identificacion);
+    }
+
+    // ─── Filtrar papelera por fecha de eliminacion ────────────────────────────
+    @Transactional(readOnly = true)
+    public List<ClientePapeleraResponseDTO> listarPapeleraPorFecha(String fechaInicio, String fechaFin) {
+        log.info("🔍 [CONSULTA] Filtrando papelera de clientes por fecha: {} - {}", fechaInicio, fechaFin);
+
+        LocalDateTime inicio = clienteUtils.parsearFechaInicio(fechaInicio);
+        LocalDateTime fin = clienteUtils.parsearFechaFin(fechaFin);
+
+        List<ClienteEntity> entidades = clienteRepository.findByFechaEliminacionBetweenAndEliminadoTrue(inicio, fin);
+
+        if (entidades.isEmpty()){
+            return List.of();
+        }
+
+        return entidades.stream().map(mapper::mapEntityToPapeleraDto).toList();
+    }
+
+    // ─── Filtrar papelera por quien elimino ───────────────────────────────────
+    @Transactional(readOnly = true)
+    public List<ClientePapeleraResponseDTO> listarPapeleraPorEliminadoPor(String eliminadoPorId) {
+        log.info("🔍 [CONSULTA] Filtrando papelera de clientes por eliminadoPorId: {}", eliminadoPorId);
+
+        List<ClienteEntity> entidades = clienteRepository.findByEliminadoPorIdContainingIgnoreCaseAndEliminadoTrue(eliminadoPorId);
+
+        if (entidades.isEmpty()){
+            return List.of();
+        }
+
+        return entidades.stream().map(mapper::mapEntityToPapeleraDto).toList();
     }
 }

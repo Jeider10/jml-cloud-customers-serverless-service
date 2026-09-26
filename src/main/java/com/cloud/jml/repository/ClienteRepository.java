@@ -33,6 +33,10 @@ public interface ClienteRepository extends JpaRepository<ClienteEntity, Long> {
 
     Optional<ClienteEntity> findByIdentificacionAndEliminadoTrue(Long identificacion);
 
+    List<ClienteEntity> findByFechaEliminacionBetweenAndEliminadoTrue(LocalDateTime inicio, LocalDateTime fin);
+
+    List<ClienteEntity> findByEliminadoPorIdContainingIgnoreCaseAndEliminadoTrue(String eliminadoPorId);
+
     // ─── Verificar duplicado ignorando eliminados ─────────────────────────────
     Optional<ClienteEntity> findByIdentificacion(Long identificacion);
 }
