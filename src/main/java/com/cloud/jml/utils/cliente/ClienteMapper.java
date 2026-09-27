@@ -52,6 +52,7 @@ public class ClienteMapper {
         clienteResponseDTO.setDireccion(clienteEntity.getDireccion());
         clienteResponseDTO.setCorreo(clienteEntity.getCorreo());
         clienteResponseDTO.setCreadoPor(clienteEntity.getCreadoPor());
+        clienteResponseDTO.setActualizadoPor(clienteEntity.getActualizadoPor());
 
         // 🕓 Formateo de fechas
         clienteFormatearFecha.asignarFechasFormateadas(clienteEntity, clienteResponseDTO);
@@ -93,6 +94,7 @@ public class ClienteMapper {
         clienteEntity.setTelefono(clienteRequestDTO.getTelefono());
         clienteEntity.setDireccion(clienteRequestDTO.getDireccion());
         clienteEntity.setCorreo(clienteRequestDTO.getCorreo());
+        clienteEntity.setActualizadoPor(clienteRequestDTO.getActualizadoPor());
 
         // Actualizamos la fecha de actualizacion
         clienteEntity.setFechaActualizacion(LocalDateTime.now());
