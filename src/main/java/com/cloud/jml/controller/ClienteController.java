@@ -32,8 +32,8 @@ public class ClienteController {
         List<ClienteResponseDTO> clientes = clienteService.listarClientes();
 
         if (clientes.isEmpty()) {
-            log.warn("📤 [RESPUESTA] No se encontraron clientes activos");
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No hay clientes activos — lista vacia");
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} clientes", clientes.size());
@@ -73,7 +73,8 @@ public class ClienteController {
         List<ClienteResponseDTO> clientes = clienteService.obtenerClientePorNombres(nombres);
 
         if (clientes.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No se encontraron clientes con nombres: {} — lista vacia", nombres);
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} clientes con nombres: {}", clientes.size(), nombres);
@@ -89,7 +90,8 @@ public class ClienteController {
         List<ClienteResponseDTO> clientes = clienteService.obtenerClientePorApellidos(apellidos);
 
         if (clientes.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No se encontraron clientes con apellidos: {} — lista vacia", apellidos);
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} clientes con apellidos: {}", clientes.size(), apellidos);
@@ -105,7 +107,8 @@ public class ClienteController {
         List<ClienteResponseDTO> clientes = clienteService.obtenerClientePorDireccion(direccion);
 
         if (clientes.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No se encontraron clientes con direccion: {} — lista vacia", direccion);
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} clientes con direccion: {}", clientes.size(), direccion);
@@ -121,7 +124,8 @@ public class ClienteController {
         List<ClienteResponseDTO> clientes = clienteService.obtenerClientePorCorreo(correo);
 
         if (clientes.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No se encontraron clientes con correo: {} — lista vacia", correo);
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} clientes con correo: {}", clientes.size(), correo);
@@ -137,7 +141,8 @@ public class ClienteController {
         List<ClienteResponseDTO> clientes = clienteService.obtenerClientePorCreadoPor(creadoPor);
 
         if (clientes.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No se encontraron clientes creados por: {} — lista vacia", creadoPor);
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} clientes creados por: {}", clientes.size(), creadoPor);
@@ -156,7 +161,8 @@ public class ClienteController {
         List<ClienteResponseDTO> clientes = clienteService.obtenerClientePorFechaCreacion(fechaInicio, fechaFin);
 
         if (clientes.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No se encontraron clientes en el rango {} - {} — lista vacia", fechaInicio, fechaFin);
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} clientes en el rango de fechas", clientes.size());
@@ -175,7 +181,8 @@ public class ClienteController {
         List<ClienteResponseDTO> clientes = clienteService.obtenerClientePorFechaActualizacion(fechaInicio, fechaFin);
 
         if (clientes.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No se encontraron clientes en el rango {} - {} — lista vacia", fechaInicio, fechaFin);
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} clientes por fecha de actualizacion", clientes.size());
@@ -219,7 +226,8 @@ public class ClienteController {
         List<ClientePapeleraResponseDTO> papelera = clienteService.listarPapelera();
 
         if (papelera.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No hay clientes en papelera — lista vacia");
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] Se retornan {} clientes en papelera", papelera.size());
@@ -259,11 +267,11 @@ public class ClienteController {
 
         log.info("📥 [SOLICITUD] Filtrar papelera de clientes por fecha: {} - {}", fechaInicio, fechaFin);
 
-
         List<ClientePapeleraResponseDTO> resultado = clienteService.listarPapeleraPorFecha(fechaInicio, fechaFin);
 
         if (resultado.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No hay clientes en papelera en el rango {} - {} — lista vacia", fechaInicio, fechaFin);
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] {} clientes en papelera en el rango de fechas", resultado.size());
@@ -281,7 +289,8 @@ public class ClienteController {
         List<ClientePapeleraResponseDTO> resultado = clienteService.listarPapeleraPorEliminadoPor(eliminadoPorId);
 
         if (resultado.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            log.info("📤 [RESPUESTA] No hay clientes en papelera eliminados por: {} — lista vacia", eliminadoPorId);
+            return ResponseEntity.ok(List.of());
         }
 
         log.info("📤 [RESPUESTA] {} clientes en papelera eliminados por: {}", resultado.size(), eliminadoPorId);
