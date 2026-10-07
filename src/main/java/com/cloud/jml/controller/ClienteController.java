@@ -207,11 +207,13 @@ public class ClienteController {
     public ResponseEntity<Void> eliminarCliente(
             @RequestParam("identificacion") Long identificacion,
             @RequestParam("eliminadoPorId") String eliminadoPorId,
-            @RequestParam("eliminadoPorNombre") String eliminadoPorNombre) {
+            @RequestParam("eliminadoPorNombre") String eliminadoPorNombre,
+            @RequestParam("eliminadoPorRol") String eliminadoPorRol,
+            @RequestParam(value = "motivo", required = false) String motivo) {
 
         log.info("📥 [SOLICITUD] Enviar a papelera cliente con identificacion: {}", identificacion);
 
-        clienteService.eliminarCliente(identificacion, eliminadoPorId, eliminadoPorNombre);
+        clienteService.eliminarCliente(identificacion, eliminadoPorId, eliminadoPorNombre, eliminadoPorRol, motivo);
 
         log.info("📤 [RESPUESTA] Cliente {} enviado a papelera por: {}", identificacion, eliminadoPorNombre);
 

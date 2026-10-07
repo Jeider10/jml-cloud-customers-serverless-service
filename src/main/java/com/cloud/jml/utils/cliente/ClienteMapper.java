@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Slf4j
 @Component // 🔹 Anotacion para indicar que es un componente de Spring
@@ -76,8 +77,15 @@ public class ClienteMapper {
         dto.setCreadoPor(clienteEntity.getCreadoPor());
         dto.setFechaCreacion(clienteFormatearFecha.formatearFecha(clienteEntity.getFechaCreacion()));
         dto.setFechaEliminacion(clienteFormatearFecha.formatearFecha(clienteEntity.getFechaEliminacion()));
+        // Calcular fechaExpiracion y diasRestantes al vuelo (no se persisten en la entidad directamente)
+        if (clienteEntity.getFechaExpiracion() != null) {
+            dto.setFechaExpiracion(clienteFormatearFecha.formatearFecha(clienteEntity.getFechaExpiracion()));
+            dto.setDiasRestantes(ChronoUnit.DAYS.between(LocalDateTime.now(), clienteEntity.getFechaExpiracion()));
+        }
         dto.setEliminadoPorId(clienteEntity.getEliminadoPorId());
         dto.setEliminadoPorNombre(clienteEntity.getEliminadoPorNombre());
+        dto.setEliminadoPorRol(clienteEntity.getEliminadoPorRol());
+        dto.setMotivo(clienteEntity.getMotivo());
 
         log.info("✅ [MAPEO] Mapeo papelera completado para cliente: identificacion={}", dto.getIdentificacion());
 

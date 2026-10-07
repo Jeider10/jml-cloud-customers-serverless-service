@@ -217,7 +217,7 @@ public class ClienteService {
 
     // ─── Soft delete (a papelera) ─────────────────────────────────────────────
     @Transactional
-    public void eliminarCliente(Long identificacion, String eliminadoPorId, String eliminadoPorNombre) {
+    public void eliminarCliente(Long identificacion, String eliminadoPorId, String eliminadoPorNombre, String eliminadoPorRol, String motivo) {
         log.info("🔍 [SOLICITUD] Enviando a papelera cliente con identificacion: {}", identificacion);
 
         ClienteEntity entidad = clienteRepository.findByIdentificacionAndEliminadoFalse(identificacion)
@@ -225,8 +225,11 @@ public class ClienteService {
 
         entidad.setEliminado(true);
         entidad.setFechaEliminacion(LocalDateTime.now());
+        entidad.setFechaExpiracion(LocalDateTime.now().plusMonths(2));
         entidad.setEliminadoPorId(eliminadoPorId);
         entidad.setEliminadoPorNombre(eliminadoPorNombre);
+        entidad.setEliminadoPorRol(eliminadoPorRol);
+        entidad.setMotivo(motivo != null ? motivo : "Sin motivo especificado");
 
         clienteUtils.guardarClienteBD(entidad);
 
@@ -267,8 +270,11 @@ public class ClienteService {
 
         entidad.setEliminado(false);
         entidad.setFechaEliminacion(null);
+        entidad.setFechaExpiracion(null);
         entidad.setEliminadoPorId(null);
         entidad.setEliminadoPorNombre(null);
+        entidad.setEliminadoPorRol(null);
+        entidad.setMotivo(null);
         entidad.setFechaActualizacion(LocalDateTime.now());
 
         ClienteEntity restaurado = clienteUtils.guardarClienteBD(entidad);
@@ -303,7 +309,7 @@ public class ClienteService {
 
         List<ClienteEntity> entidades = clienteRepository.findByFechaEliminacionBetweenAndEliminadoTrue(inicio, fin);
 
-        if (entidades.isEmpty()){
+        if (entidades.isEmpty()) {
             return List.of();
         }
 
@@ -317,7 +323,7 @@ public class ClienteService {
 
         List<ClienteEntity> entidades = clienteRepository.findByEliminadoPorIdContainingIgnoreCaseAndEliminadoTrue(eliminadoPorId);
 
-        if (entidades.isEmpty()){
+        if (entidades.isEmpty()) {
             return List.of();
         }
 
